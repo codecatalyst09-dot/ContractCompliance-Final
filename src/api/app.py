@@ -32,12 +32,21 @@ from src.monitoring.logging_config import get_logger
 
 logger = get_logger("api")
 
-# ── Ensure required output directories exist ──────────────────────────────────
-for d in ["uploads", "outputs/compliance", "outputs/evidence", "outputs/evidence_images", "outputs/audit", "database"]:
-    os.makedirs(d, exist_ok=True)
+# ── Ensure required output directories exist (safe for serverless / read-only disks) ──
+def _safe_mkdir(path_str: str):
+    try:
+        os.makedirs(path_str, exist_ok=True)
+    except Exception:
+        pass
 
-# ── Initialise SQLite DB ──────────────────────────────────────────────────────
-init_db()
+for d in ["uploads", "outputs/compliance", "outputs/evidence", "outputs/evidence_images", "outputs/audit", "database"]:
+    _safe_mkdir(d)
+
+# ── Initialise SQLite DB safely ───────────────────────────────────────────────
+try:
+    init_db()
+except Exception as e:
+    logger.warning(f"Database init deferred or running on ephemeral store: {e}")
 
 # ── Project paths ─────────────────────────────────────────────────────────────
 ROOT_DIR = Path(__file__).resolve().parent.parent.parent
@@ -47,8 +56,9 @@ static_dir = Path(__file__).parent.parent / "static"
 # ── FastAPI App ───────────────────────────────────────────────────────────────
 app = FastAPI(title="Contract Compliance Agent", version="1.0.0")
 
-# Mount static files
-app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
+# Mount static files safely
+if static_dir.exists():
+    app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
 
 # ── WebSocket Manager ─────────────────────────────────────────────────────────
 class ConnectionManager:
@@ -185,7 +195,8 @@ async def serve_logs_page():
 async def api_get_logs(limit: int = 200, run_id: Optional[str] = None, level: Optional[str] = None):
     """Return structured log entries, optionally filtered by run_id and/or level."""
     from collections import deque
-    log_path = "logs/application.jsonl"
+    from src.monitoring.logging_config import get_default_log_path
+    log_path = get_default_log_path()
     if not os.path.exists(log_path):
         return {"logs": []}
     lines: deque = deque(maxlen=max(1, limit))
@@ -212,7 +223,8 @@ async def api_get_logs(limit: int = 200, run_id: Optional[str] = None, level: Op
 @app.post("/api/logs/clear")
 async def api_clear_logs():
     """Clear all application activity logs."""
-    log_path = "logs/application.jsonl"
+    from src.monitoring.logging_config import get_default_log_path
+    log_path = get_default_log_path()
     try:
         if os.path.exists(log_path):
             with open(log_path, "w", encoding="utf-8") as f:
@@ -306,7 +318,8 @@ async def api_monitoring_agents():
     ]
 
     # Read structured log file to calculate real latency & error stats
-    log_path = "logs/application.jsonl"
+    from src.monitoring.logging_config import get_default_log_path
+    log_path = get_default_log_path()
     agent_stats = {a["stage"]: {"calls": 0, "durations": [], "errors": 0} for a in agents_def}
 
     if os.path.exists(log_path):
@@ -402,7 +415,8 @@ async def api_monitoring_executions(limit: int = 50):
 @app.get("/api/monitoring/errors")
 async def api_monitoring_errors(limit: int = 50):
     """Return recent application errors and exceptions with execution ID and agent context."""
-    log_path = "logs/application.jsonl"
+    from src.monitoring.logging_config import get_default_log_path
+    log_path = get_default_log_path()
     if not os.path.exists(log_path):
         return {"errors": []}
 
