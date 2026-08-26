@@ -14,21 +14,11 @@ from datetime import datetime, timezone
 from typing import List, Optional, Dict, Any
 from contextlib import contextmanager
 
-def _get_default_db_path() -> str:
-    if os.getenv("VERCEL") or not os.access(".", os.W_OK):
-        return "/tmp/compliance.db"
-    return "database/compliance.db"
-
-DB_PATH = os.getenv("SQLITE_DB_PATH", _get_default_db_path())
+DB_PATH = os.getenv("SQLITE_DB_PATH", "database/compliance.db")
 
 
 def _get_connection() -> sqlite3.Connection:
-    try:
-        dirname = os.path.dirname(DB_PATH)
-        if dirname:
-            os.makedirs(dirname, exist_ok=True)
-    except Exception:
-        pass
+    os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
     conn = sqlite3.connect(DB_PATH, timeout=30.0, check_same_thread=False)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA journal_mode=WAL")   # allow concurrent reads

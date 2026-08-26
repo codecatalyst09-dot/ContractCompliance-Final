@@ -26,22 +26,12 @@ def sanitize_log_payload(data: Dict[str, Any]) -> Dict[str, Any]:
             clean[k] = v
     return clean
 
-def get_default_log_path() -> str:
-    if os.getenv("VERCEL") or not os.access(".", os.W_OK):
-        return "/tmp/application.jsonl"
-    return "logs/application.jsonl"
-
 class JSONLinesHandler(logging.Handler):
     """Custom logging handler that writes structured JSON lines to a file."""
-    def __init__(self, file_path: Optional[str] = None):
+    def __init__(self, file_path: str = "logs/application.jsonl"):
         super().__init__()
-        self.file_path = file_path or get_default_log_path()
-        try:
-            dirname = os.path.dirname(self.file_path)
-            if dirname:
-                os.makedirs(dirname, exist_ok=True)
-        except Exception:
-            pass
+        self.file_path = file_path
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
 
     def emit(self, record: logging.LogRecord):
         try:
@@ -70,7 +60,7 @@ def get_logger(name: str = "contract_compliance") -> logging.Logger:
         console_handler.setFormatter(console_formatter)
         logger.addHandler(console_handler)
         # JSON lines file handler
-        json_handler = JSONLinesHandler()
+        json_handler = JSONLinesHandler("logs/application.jsonl")
         logger.addHandler(json_handler)
     return logger
 
