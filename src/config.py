@@ -57,11 +57,10 @@ class Config(BaseModel):
 
         if missing:
             print(
-                f"[CONFIG ERROR] The following required environment variables are not set:\n"
+                f"[CONFIG WARNING] The following environment variables are not set:\n"
                 + "\n".join(f"  - {v}" for v in missing)
-                + f"\n\nPlease set them in your .env file. See .env.example for reference."
+                + f"\nPlease set them in your environment / .env file."
             )
-            sys.exit(1)
 
         return self
 

@@ -11,12 +11,7 @@ if hasattr(sys.stdout, "reconfigure"):
 
 from src.workflow.compliance_workflow import ContractComplianceWorkflow, get_compliance_workflow
 from src.monitoring.logging_config import get_logger
-
-# Export top-level FastAPI instance for Vercel / ASGI runners
-try:
-    from src.api.app import app
-except Exception:
-    app = None
+from src.api.app import app
 
 logger = get_logger("main_cli")
 
