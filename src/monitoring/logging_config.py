@@ -1,8 +1,30 @@
 import os
 import json
+import re
 import logging
 from datetime import datetime, timezone
 from typing import Optional, Dict, Any
+
+from src.config import config
+
+SENSITIVE_KEYS = {"password", "secret", "api_key", "token", "authorization", "access_token", "connection_string"}
+
+def sanitize_log_payload(data: Dict[str, Any]) -> Dict[str, Any]:
+    """Sanitize structured logging payload to prevent PII, secrets, and raw contract leaks."""
+    clean = {}
+    for k, v in data.items():
+        lower_k = str(k).lower()
+        if any(sk in lower_k for sk in SENSITIVE_KEYS):
+            clean[k] = "[REDACTED_SECRET]"
+        elif lower_k in {"contract_text", "raw_text", "document_text", "full_text"} and not config.enable_sensitive_data:
+            clean[k] = f"[REDACTED_DOCUMENT_TEXT ({len(str(v))} chars)]"
+        elif isinstance(v, dict):
+            clean[k] = sanitize_log_payload(v)
+        elif isinstance(v, list):
+            clean[k] = [sanitize_log_payload(item) if isinstance(item, dict) else item for item in v]
+        else:
+            clean[k] = v
+    return clean
 
 class JSONLinesHandler(logging.Handler):
     """Custom logging handler that writes structured JSON lines to a file."""
@@ -20,7 +42,8 @@ class JSONLinesHandler(logging.Handler):
                 "message": record.getMessage()
             }
             if hasattr(record, "structured_data"):
-                log_entry.update(record.structured_data)
+                sanitized = sanitize_log_payload(record.structured_data)
+                log_entry.update(sanitized)
             
             with open(self.file_path, "a", encoding="utf-8") as f:
                 f.write(json.dumps(log_entry) + "\n")
@@ -54,7 +77,7 @@ def log_event(
     error_type: Optional[str] = None,
     error_message: Optional[str] = None
 ):
-    """Convenience helper to emit compliant structured log events."""
+    """Convenience helper to emit compliant structured log events with execution IDs."""
     data = {
         "run_id": run_id,
         "stage": stage,

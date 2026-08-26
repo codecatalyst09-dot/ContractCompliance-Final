@@ -3,743 +3,815 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Run Monitor &amp; Logs — Contract Compliance</title>
-  <meta name="description" content="Real-time per-run monitoring, stage pipeline timeline, structured log stream and findings dashboard for Contract Compliance Agent." />
+  <title>Azure Monitor & Telemetry — Compliance AI</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --bg:#080b18; --bg2:#0d1121; --bg3:#111828;
-      --surface:rgba(255,255,255,0.04); --surface2:rgba(255,255,255,0.07); --surface3:rgba(255,255,255,0.10);
-      --border:rgba(255,255,255,0.08); --border2:rgba(255,255,255,0.12);
-      --accent:#5b6ef5; --accent2:#7c3aed;
-      --pass:#10b981; --risk:#f59e0b; --fail:#ef4444; --skip:#6b7280;
-      --info:#38bdf8; --warn:#fb923c; --error:#f87171;
-      --text:#e2e8f0; --text2:#94a3b8; --text3:#475569;
-      --mono:'JetBrains Mono',monospace;
-      --radius:12px; --radius-sm:7px; --shadow:0 8px 32px rgba(0,0,0,0.5);
+      --bg: #080b18;
+      --bg2: #0d1121;
+      --surface: rgba(255, 255, 255, 0.035);
+      --surface2: rgba(255, 255, 255, 0.06);
+      --surface3: rgba(255, 255, 255, 0.09);
+      --border: rgba(255, 255, 255, 0.08);
+      --border2: rgba(255, 255, 255, 0.14);
+      --accent: #5b6ef5;
+      --accent2: #7c3aed;
+      --pass: #10b981;
+      --risk: #f59e0b;
+      --fail: #ef4444;
+      --info: #38bdf8;
+      --text: #f1f5f9;
+      --text2: #94a3b8;
+      --text3: #64748b;
+      --radius: 12px;
+      --radius-sm: 8px;
+      --mono: 'JetBrains Mono', monospace;
     }
-    html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:13px;overflow:hidden;}
-    body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse 70% 50% at 15% 0%,rgba(91,110,245,0.10) 0%,transparent 65%),radial-gradient(ellipse 50% 40% at 85% 100%,rgba(124,58,237,0.08) 0%,transparent 65%);pointer-events:none;}
-    #app{display:flex;flex-direction:column;height:100vh;position:relative;z-index:1;}
-    /* NAV */
-    #topnav{display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:56px;flex-shrink:0;background:rgba(8,11,24,0.85);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);}
-    .nav-left{display:flex;align-items:center;gap:14px;}
-    .nav-logo{display:flex;align-items:center;gap:9px;text-decoration:none;}
-    .nav-logo-icon{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:16px;}
-    .nav-logo-text{font-size:15px;font-weight:700;color:var(--text);}
-    .nav-divider{width:1px;height:20px;background:var(--border);}
-    .nav-page{font-size:13px;font-weight:600;color:var(--text2);}
-    .nav-right{display:flex;align-items:center;gap:10px;}
-    .btn{padding:7px 14px;border-radius:var(--radius-sm);border:none;cursor:pointer;font-size:12px;font-weight:500;font-family:'Inter',sans-serif;transition:all 0.18s;display:inline-flex;align-items:center;gap:5px;}
-    .btn-ghost{background:var(--surface);color:var(--text2);border:1px solid var(--border);}
-    .btn-ghost:hover{background:var(--surface2);color:var(--text);}
-    .btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;}
-    .btn-primary:hover{opacity:0.88;transform:translateY(-1px);box-shadow:0 4px 14px rgba(91,110,245,0.35);}
-    /* KPI */
-    #kpi-bar{display:flex;align-items:center;flex-shrink:0;background:var(--bg2);border-bottom:1px solid var(--border);}
-    .kpi-cell{flex:1;padding:14px 20px;border-right:1px solid var(--border);display:flex;align-items:center;gap:12px;transition:background 0.18s;}
-    .kpi-cell:last-child{border-right:none;}
-    .kpi-cell:hover{background:var(--surface);}
-    .kpi-icon{font-size:20px;flex-shrink:0;}
-    .kpi-val{font-size:22px;font-weight:800;line-height:1;}
-    .kpi-lbl{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.8px;margin-top:2px;}
-    .kpi-cell.pass .kpi-val{color:var(--pass);}
-    .kpi-cell.fail .kpi-val{color:var(--fail);}
-    .kpi-cell.risk .kpi-val{color:var(--risk);}
-    .kpi-cell.accent .kpi-val{color:var(--accent);}
-    /* BODY */
-    #body{display:flex;flex:1;overflow:hidden;}
-    /* RUN PANEL */
-    #run-panel{width:280px;min-width:280px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;}
-    .panel-header{padding:14px 16px 10px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);flex-shrink:0;}
-    .panel-header-title{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;}
-    .panel-header-action{font-size:11px;color:var(--accent);cursor:pointer;background:none;border:none;font-family:'Inter',sans-serif;padding:2px 6px;border-radius:4px;}
-    .panel-header-action:hover{background:var(--surface2);}
-    #run-search{margin:10px 12px 8px;padding:7px 11px;width:calc(100% - 24px);background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:12px;font-family:'Inter',sans-serif;outline:none;transition:border-color 0.2s;}
-    #run-search:focus{border-color:var(--accent);}
-    #run-search::placeholder{color:var(--text3);}
-    #run-list{flex:1;overflow-y:auto;padding:0 10px 10px;}
-    #run-list::-webkit-scrollbar{width:3px;}
-    #run-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
-    .run-item{padding:10px 11px;margin-bottom:5px;border-radius:var(--radius-sm);background:var(--surface);border:1px solid var(--border);cursor:pointer;transition:all 0.15s;position:relative;overflow:hidden;}
-    .run-item::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:3px 0 0 3px;}
-    .run-item.PASS::before,.run-item.pass::before{background:var(--pass);}
-    .run-item.RISK::before,.run-item.risk::before{background:var(--risk);}
-    .run-item.FAIL::before,.run-item.fail::before{background:var(--fail);}
-    .run-item.SKIPPED::before,.run-item.skipped::before{background:var(--skip);}
-    .run-item.PROCESSING::before,.run-item.proc::before{background:var(--accent);animation:blink-bar 1.2s ease-in-out infinite;}
-    .run-item.FAILED::before{background:var(--fail);}
-    @keyframes blink-bar{0%,100%{opacity:1}50%{opacity:0.3}}
-    .run-item:hover{background:var(--surface2);}
-    .run-item.active{background:rgba(91,110,245,0.08);border-color:rgba(91,110,245,0.35);}
-    .ri-name{font-size:11px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:5px;padding-left:6px;}
-    .ri-foot{display:flex;align-items:center;justify-content:space-between;padding-left:6px;}
-    .ri-badge{font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;text-transform:uppercase;letter-spacing:0.4px;}
-    .ri-badge.PASS,.ri-badge.pass{background:rgba(16,185,129,0.15);color:var(--pass);}
-    .ri-badge.RISK,.ri-badge.risk{background:rgba(245,158,11,0.15);color:var(--risk);}
-    .ri-badge.FAIL,.ri-badge.fail{background:rgba(239,68,68,0.15);color:var(--fail);}
-    .ri-badge.SKIPPED,.ri-badge.skipped{background:rgba(107,114,128,0.15);color:var(--skip);}
-    .ri-badge.PROCESSING,.ri-badge.PENDING{background:rgba(91,110,245,0.15);color:var(--accent);}
-    .ri-badge.FAILED{background:rgba(239,68,68,0.15);color:var(--fail);}
-    .ri-score{font-size:10px;color:var(--text3);}
-    .ri-time{font-size:9px;color:var(--text3);}
-    /* CENTER */
-    #center{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
-    /* STAGES */
-    #stage-panel{flex-shrink:0;background:var(--bg2);border-bottom:1px solid var(--border);padding:14px 18px;}
-    #stage-panel-label{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;}
-    #stage-run-id{font-size:9px;color:var(--text3);font-family:var(--mono);}
-    #stage-track{display:flex;align-items:center;gap:4px;overflow-x:auto;padding-bottom:4px;}
-    #stage-track::-webkit-scrollbar{height:2px;}
-    #stage-track::-webkit-scrollbar-thumb{background:var(--border);}
-    .stage-node{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:5px;min-width:90px;}
-    .stage-bubble{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;border:2px solid var(--border);background:var(--surface);transition:all 0.3s;position:relative;}
-    .stage-bubble.idle{border-color:var(--border);}
-    .stage-bubble.running{border-color:var(--accent);background:rgba(91,110,245,0.15);animation:pulse-bubble 1.4s ease-in-out infinite;}
-    .stage-bubble.done{border-color:var(--pass);background:rgba(16,185,129,0.12);}
-    .stage-bubble.failed{border-color:var(--fail);background:rgba(239,68,68,0.12);}
-    .stage-bubble.skipped{border-color:var(--skip);background:var(--surface);opacity:0.5;}
-    @keyframes pulse-bubble{0%,100%{box-shadow:0 0 0 0 rgba(91,110,245,0.4)}50%{box-shadow:0 0 0 8px rgba(91,110,245,0)}}
-    .stage-label{font-size:9px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;text-align:center;}
-    .stage-dur{font-size:8px;color:var(--text3);font-family:var(--mono);}
-    .stage-status-txt{font-size:8px;font-weight:600;text-transform:uppercase;}
-    .stage-status-txt.done{color:var(--pass);}
-    .stage-status-txt.running{color:var(--accent);}
-    .stage-status-txt.failed{color:var(--fail);}
-    .stage-status-txt.skipped{color:var(--skip);}
-    .stage-connector{height:2px;flex:1;min-width:16px;background:var(--border);border-radius:1px;margin-bottom:28px;transition:background 0.3s;}
-    .stage-connector.done{background:var(--pass);}
-    .stage-connector.running{background:var(--accent);}
-    /* META STRIP */
-    #run-meta-strip{padding:10px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:var(--bg2);flex-shrink:0;}
-    .meta-chip{display:flex;align-items:center;gap:5px;padding:4px 9px;background:var(--surface);border:1px solid var(--border);border-radius:20px;font-size:10.5px;color:var(--text2);}
-    .meta-chip .mc-key{color:var(--text3);}
-    .meta-chip .mc-val{font-weight:600;font-family:var(--mono);}
-    .risk-badge-lg{padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;}
-    .risk-badge-lg.PASS{background:rgba(16,185,129,0.15);color:var(--pass);border:1px solid rgba(16,185,129,0.3);}
-    .risk-badge-lg.RISK{background:rgba(245,158,11,0.15);color:var(--risk);border:1px solid rgba(245,158,11,0.3);}
-    .risk-badge-lg.FAIL{background:rgba(239,68,68,0.15);color:var(--fail);border:1px solid rgba(239,68,68,0.3);}
-    .risk-badge-lg.SKIPPED{background:rgba(107,114,128,0.15);color:var(--skip);border:1px solid rgba(107,114,128,0.3);}
-    .risk-badge-lg.PROCESSING{background:rgba(91,110,245,0.15);color:var(--accent);border:1px solid rgba(91,110,245,0.3);}
-    .risk-badge-lg.FAILED{background:rgba(239,68,68,0.15);color:var(--fail);border:1px solid rgba(239,68,68,0.3);}
-    /* LOG PANEL */
-    #log-panel{flex:1;display:flex;flex-direction:column;overflow:hidden;}
-    #log-toolbar{display:flex;align-items:center;gap:8px;padding:10px 16px;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--bg2);}
-    .lt-label{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-right:4px;}
-    #log-search{flex:1;padding:6px 10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:12px;font-family:'Inter',sans-serif;outline:none;transition:border-color 0.2s;}
-    #log-search:focus{border-color:var(--accent);}
-    #log-search::placeholder{color:var(--text3);}
-    .level-btn{padding:5px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);color:var(--text2);cursor:pointer;font-size:11px;font-weight:600;font-family:'Inter',sans-serif;transition:all 0.15s;text-transform:uppercase;letter-spacing:0.4px;}
-    .level-btn:hover{background:var(--surface2);}
-    .level-btn.active.INFO{background:rgba(56,189,248,0.15);border-color:rgba(56,189,248,0.4);color:var(--info);}
-    .level-btn.active.WARNING{background:rgba(251,146,60,0.15);border-color:rgba(251,146,60,0.4);color:var(--warn);}
-    .level-btn.active.ERROR{background:rgba(248,113,113,0.15);border-color:rgba(248,113,113,0.4);color:var(--error);}
-    .level-btn.active.ALL{background:rgba(91,110,245,0.15);border-color:rgba(91,110,245,0.4);color:var(--accent);}
-    .auto-scroll-toggle{display:flex;align-items:center;gap:5px;cursor:pointer;font-size:11px;color:var(--text2);user-select:none;}
-    .toggle-track{width:30px;height:16px;border-radius:8px;background:var(--surface2);border:1px solid var(--border);position:relative;transition:background 0.2s;}
-    .toggle-thumb{position:absolute;top:2px;left:2px;width:10px;height:10px;border-radius:50%;background:var(--text3);transition:all 0.2s;}
-    .auto-scroll-toggle.on .toggle-track{background:rgba(91,110,245,0.3);border-color:rgba(91,110,245,0.5);}
-    .auto-scroll-toggle.on .toggle-thumb{background:var(--accent);left:16px;}
-    .log-count{font-size:10px;color:var(--text3);font-family:var(--mono);white-space:nowrap;}
-    #log-stream{flex:1;overflow-y:auto;padding:8px 0;font-family:var(--mono);font-size:11.5px;line-height:1.55;}
-    #log-stream::-webkit-scrollbar{width:4px;}
-    #log-stream::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
-    .log-row{display:flex;align-items:flex-start;gap:0;padding:3px 16px;transition:background 0.1s;border-left:2px solid transparent;}
-    .log-row:hover{background:var(--surface);}
-    .log-row.WARNING{border-left-color:var(--warn);background:rgba(251,146,60,0.03);}
-    .log-row.ERROR{border-left-color:var(--error);background:rgba(248,113,113,0.05);}
-    .log-ts{color:var(--text3);min-width:90px;flex-shrink:0;font-size:10.5px;}
-    .log-level{min-width:58px;flex-shrink:0;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:0.4px;padding:1px 5px;border-radius:3px;text-align:center;margin:0 6px;}
-    .log-level.INFO{background:rgba(56,189,248,0.12);color:var(--info);}
-    .log-level.WARNING{background:rgba(251,146,60,0.12);color:var(--warn);}
-    .log-level.ERROR{background:rgba(248,113,113,0.12);color:var(--error);}
-    .log-stage{color:var(--accent);min-width:100px;flex-shrink:0;font-size:10.5px;}
-    .log-event{color:var(--text2);flex:1;font-size:11px;white-space:pre-wrap;word-break:break-all;}
-    .log-event .kw{color:var(--text);font-weight:500;}
-    .log-empty{text-align:center;padding:40px 20px;color:var(--text3);font-family:'Inter',sans-serif;}
-    .log-empty .le-icon{font-size:32px;margin-bottom:8px;opacity:0.4;}
-    .log-empty p{font-size:12px;}
-    /* FINDINGS */
-    #findings-panel{width:300px;min-width:300px;background:var(--bg2);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;}
-    #findings-scroll{flex:1;overflow-y:auto;padding:10px;}
-    #findings-scroll::-webkit-scrollbar{width:3px;}
-    #findings-scroll::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
-    .finding-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;margin-bottom:8px;transition:all 0.15s;position:relative;overflow:hidden;}
-    .finding-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;}
-    .finding-card.COMPLIANT::before{background:var(--pass);}
-    .finding-card.NON_COMPLIANT::before{background:var(--fail);}
-    .finding-card.PARTIAL::before{background:var(--risk);}
-    .finding-card.NOT_FOUND::before{background:var(--skip);}
-    .finding-card:hover{background:var(--surface2);}
-    .fc-head{display:flex;align-items:flex-start;justify-content:space-between;gap:6px;margin-bottom:6px;padding-left:6px;}
-    .fc-pid{font-size:10px;font-weight:700;color:var(--accent);}
-    .fc-sev{font-size:9px;font-weight:700;padding:2px 5px;border-radius:3px;text-transform:uppercase;flex-shrink:0;}
-    .fc-sev.CRITICAL{background:rgba(239,68,68,0.2);color:#f87171;}
-    .fc-sev.HIGH{background:rgba(245,158,11,0.2);color:#fbbf24;}
-    .fc-sev.MEDIUM{background:rgba(251,191,36,0.15);color:#fcd34d;}
-    .fc-sev.LOW{background:rgba(16,185,129,0.15);color:var(--pass);}
-    .fc-name{font-size:11px;font-weight:600;padding-left:6px;margin-bottom:4px;line-height:1.3;}
-    .fc-status-badge{display:inline-flex;align-items:center;gap:4px;font-size:9px;font-weight:700;padding:2px 7px;border-radius:4px;text-transform:uppercase;letter-spacing:0.4px;margin-left:6px;margin-bottom:6px;}
-    .fc-status-badge::before{content:'';width:5px;height:5px;border-radius:50%;}
-    .fc-status-badge.COMPLIANT{background:rgba(16,185,129,0.12);color:var(--pass);}
-    .fc-status-badge.COMPLIANT::before{background:var(--pass);}
-    .fc-status-badge.NON_COMPLIANT{background:rgba(239,68,68,0.12);color:var(--fail);}
-    .fc-status-badge.NON_COMPLIANT::before{background:var(--fail);}
-    .fc-status-badge.PARTIAL{background:rgba(245,158,11,0.12);color:var(--risk);}
-    .fc-status-badge.PARTIAL::before{background:var(--risk);}
-    .fc-status-badge.NOT_FOUND{background:rgba(107,114,128,0.12);color:var(--skip);}
-    .fc-status-badge.NOT_FOUND::before{background:var(--skip);}
-    .fc-finding{font-size:10.5px;color:var(--text2);line-height:1.45;padding-left:6px;}
-    .findings-empty{text-align:center;padding:40px 16px;color:var(--text3);font-size:12px;}
-    .findings-empty .fe-icon{font-size:28px;margin-bottom:8px;opacity:0.3;}
-    /* EMPTY */
-    .center-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--text3);gap:12px;}
-    .center-empty .ce-icon{font-size:48px;opacity:0.25;}
-    .center-empty h3{font-size:16px;font-weight:600;color:var(--text2);}
-    .center-empty p{font-size:12px;text-align:center;max-width:280px;line-height:1.5;}
-    /* TOAST */
-    #toast{position:fixed;bottom:20px;right:20px;z-index:9999;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 16px;font-size:12px;backdrop-filter:blur(12px);opacity:0;transform:translateY(8px);transition:all 0.22s;pointer-events:none;}
-    #toast.show{opacity:1;transform:translateY(0);}
-
-    /* ─── RISK BREAKDOWN ─────────────────────────── */
-    #risk-breakdown-panel {
-      border-top: 1px solid var(--border);
-      flex-shrink: 0;
-      max-height: 340px;
-      overflow-y: auto;
-      background: var(--bg2);
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.5;
     }
-    #risk-breakdown-panel::-webkit-scrollbar { width: 3px; }
-    #risk-breakdown-panel::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-
-    .rb-header {
-      padding: 12px 14px 8px;
-      display: flex; align-items: center; justify-content: space-between;
-      position: sticky; top: 0; background: var(--bg2);
-      border-bottom: 1px solid var(--border); z-index: 2;
-    }
-    .rb-title { font-size: 10px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; }
-    .rb-score-pill {
-      display: flex; align-items: center; gap: 6px;
-      font-size: 13px; font-weight: 800;
-    }
-    .rb-score-circle {
-      width: 38px; height: 38px; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 12px; font-weight: 800; border: 2px solid;
-    }
-    .rb-score-circle.LOW      { color: var(--pass); border-color: var(--pass); background: rgba(16,185,129,0.1); }
-    .rb-score-circle.MEDIUM   { color: var(--risk); border-color: var(--risk); background: rgba(245,158,11,0.1); }
-    .rb-score-circle.HIGH     { color: var(--warn); border-color: var(--warn); background: rgba(251,146,60,0.1); }
-    .rb-score-circle.CRITICAL { color: var(--fail); border-color: var(--fail); background: rgba(239,68,68,0.1); }
-
-    .rb-explanation {
-      padding: 8px 14px; font-size: 10px; color: var(--text3); line-height: 1.5;
+    
+    /* Top Bar */
+    .topbar {
+      padding: 14px 28px;
       border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(10, 13, 26, 0.85);
+      backdrop-filter: blur(14px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .logo-badge {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      box-shadow: 0 0 16px rgba(91, 110, 245, 0.35);
+    }
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
     }
 
-    .rb-contributor {
-      padding: 9px 14px; border-bottom: 1px solid var(--border);
-      transition: background 0.12s; position: relative;
+    /* Buttons & Controls */
+    .btn {
+      padding: 7px 14px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 12.5px;
+      font-weight: 500;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.15s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      user-select: none;
     }
-    .rb-contributor:last-child { border-bottom: none; }
-    .rb-contributor:hover { background: var(--surface); }
-
-    .rb-contrib-head {
-      display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;
+    .btn:hover {
+      background: var(--surface2);
+      border-color: var(--border2);
+      transform: translateY(-1px);
     }
-    .rb-pid { font-size: 10px; font-weight: 700; color: var(--accent); }
-    .rb-penalty {
-      font-size: 13px; font-weight: 800; font-family: var(--mono);
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff;
+      border: none;
+      box-shadow: 0 2px 10px rgba(91, 110, 245, 0.3);
     }
-    .rb-penalty.zero  { color: var(--pass); }
-    .rb-penalty.low   { color: var(--info); }
-    .rb-penalty.med   { color: var(--risk); }
-    .rb-penalty.high  { color: var(--warn); }
-    .rb-penalty.crit  { color: var(--fail); }
-
-    .rb-contrib-name { font-size: 10.5px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
-    .rb-formula { font-size: 9.5px; color: var(--text3); font-family: var(--mono); margin-bottom: 3px; }
-    .rb-reason  { font-size: 10px; color: var(--text2); line-height: 1.4; }
-
-    .rb-bar-wrap { margin-top: 5px; height: 4px; background: var(--surface2); border-radius: 2px; overflow: hidden; }
-    .rb-bar      { height: 100%; border-radius: 2px; transition: width 0.5s ease; }
-    .rb-bar.zero  { background: var(--pass); }
-    .rb-bar.low   { background: var(--info); }
-    .rb-bar.med   { background: var(--risk); }
-    .rb-bar.high  { background: var(--warn); }
-    .rb-bar.crit  { background: var(--fail); }
-
-    .rb-empty { text-align: center; padding: 24px 14px; color: var(--text3); font-size: 11px; }
-
-    /* ─── WEIGHTS LEGEND ─────────────────────────── */
-    .rb-legend {
-      display: flex; flex-wrap: wrap; gap: 6px;
-      padding: 8px 14px; border-bottom: 1px solid var(--border);
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #687bf7, #8b5cf6);
+      box-shadow: 0 4px 14px rgba(91, 110, 245, 0.45);
     }
-    .rb-leg-chip {
-      display: flex; align-items: center; gap: 4px;
-      padding: 2px 7px; border-radius: 10px;
-      font-size: 9px; font-weight: 600;
-      background: var(--surface); border: 1px solid var(--border); color: var(--text2);
+
+    /* Layout Container */
+    .container {
+      max-width: 1400px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 24px 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
     }
-    .rb-leg-chip .dot { width: 6px; height: 6px; border-radius: 50%; }
+
+    /* KPI Row */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+    }
+    .kpi-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .kpi-card:hover {
+      border-color: var(--border2);
+      transform: translateY(-2px);
+    }
+    .kpi-title {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-bottom: 6px;
+    }
+    .kpi-value {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 4px;
+      font-feature-settings: 'tnum';
+    }
+    .kpi-sub {
+      font-size: 11.5px;
+      color: var(--text2);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    /* Agent Health Grid */
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .section-title {
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .agent-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 14px;
+    }
+    .agent-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      transition: all 0.2s ease;
+    }
+    .agent-card:hover {
+      border-color: var(--border2);
+      background: rgba(255, 255, 255, 0.05);
+    }
+    .agent-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+    .agent-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .agent-class {
+      font-size: 10.5px;
+      font-family: var(--mono);
+      color: var(--text3);
+      margin-top: 2px;
+    }
+    .agent-meta-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+      font-size: 11.5px;
+    }
+    .agent-meta-lbl {
+      color: var(--text3);
+      font-size: 10.5px;
+      margin-bottom: 2px;
+    }
+    .agent-meta-val {
+      font-weight: 600;
+      color: var(--text);
+      font-family: var(--mono);
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 8px;
+      border-radius: 20px;
+      font-size: 10.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+    .badge-healthy {
+      background: rgba(16, 185, 129, 0.12);
+      color: var(--pass);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    .badge-degraded {
+      background: rgba(245, 158, 11, 0.12);
+      color: var(--risk);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+    .badge-unhealthy {
+      background: rgba(239, 68, 68, 0.12);
+      color: var(--fail);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    /* Tables & Cards */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    }
+    .table-wrap {
+      overflow-x: auto;
+      margin-top: 10px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12.5px;
+    }
+    th {
+      text-align: left;
+      padding: 10px 14px;
+      color: var(--text3);
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    td {
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      color: var(--text2);
+    }
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.025);
+      color: var(--text);
+    }
+
+    /* Status Pills */
+    .status-pill {
+      padding: 3px 9px;
+      border-radius: 12px;
+      font-size: 10.5px;
+      font-weight: 700;
+      font-family: var(--mono);
+      display: inline-block;
+    }
+    .status-COMPLETED, .status-PASS, .status-APPROVED { background: rgba(16, 185, 129, 0.15); color: var(--pass); }
+    .status-RISK { background: rgba(245, 158, 11, 0.15); color: var(--risk); }
+    .status-FAIL, .status-FAILED, .status-REJECTED { background: rgba(239, 68, 68, 0.15); color: var(--fail); }
+    .status-PROCESSING { background: rgba(91, 110, 245, 0.15); color: var(--accent); }
+    .status-SKIPPED { background: rgba(148, 163, 184, 0.15); color: var(--text2); }
+
+    /* KQL Drawer / Modal */
+    .kql-card {
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+    .kql-title {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 4px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .kql-desc {
+      font-size: 11.5px;
+      color: var(--text3);
+      margin-bottom: 10px;
+    }
+    pre.kql-code {
+      background: #050711;
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: #7dd3fc;
+      overflow-x: auto;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      line-height: 1.45;
+    }
+
+    /* Modal Backdrop */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 20px;
+    }
+    .modal-content {
+      background: var(--bg2);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius);
+      max-width: 800px;
+      width: 100%;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6);
+      overflow: hidden;
+    }
+    .modal-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .modal-body {
+      padding: 20px;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    /* Pulse dot */
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--pass);
+      display: inline-block;
+      box-shadow: 0 0 8px var(--pass);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
   </style>
 </head>
 <body>
-<div id="app">
-  <!-- TOP NAV -->
-  <nav id="topnav">
-    <div class="nav-left">
-      <a class="nav-logo" href="/">
-        <div class="nav-logo-icon">&#9878;&#65039;</div>
-        <span class="nav-logo-text">Compliance AI</span>
+
+  <!-- Top Bar -->
+  <div class="topbar">
+    <div class="logo-badge">
+      <div class="logo-icon">📡</div>
+      <div>
+        <div style="font-weight: 700; font-size: 15px;">Compliance AI — Live Telemetry & System Monitor</div>
+        <div style="font-size: 11px; color: var(--text2); display: flex; align-items: center; gap: 8px;">
+          <span class="pulse-dot"></span>
+          <span>Azure Monitor & OpenTelemetry Stream Active</span>
+          <span id="azure-status-badge" style="margin-left: 6px; padding: 1px 7px; border-radius: 10px; font-size: 10px; font-weight: 700; background: rgba(91,110,245,0.15); color: var(--accent);">Checking Azure...</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-actions">
+      <button class="btn" onclick="openKqlModal()">
+        <span>📋</span>
+        <span>KQL Queries</span>
+      </button>
+      <button class="btn" onclick="refreshAll(true)">
+        <span>↺</span>
+        <span>Refresh</span>
+      </button>
+      <a href="/" class="btn btn-primary">
+        <span>←</span>
+        <span>Return to Admin Desk</span>
       </a>
-      <div class="nav-divider"></div>
-      <span class="nav-page">&#128202; Run Monitor &amp; Logs</span>
-    </div>
-    <div class="nav-right">
-      <button class="btn btn-ghost" onclick="refreshAll()" id="refresh-btn">&#8634; Refresh</button>
-      <a class="btn btn-primary" href="/">&#9878;&#65039; Back to Dashboard</a>
-    </div>
-  </nav>
-
-  <!-- KPI BAR -->
-  <div id="kpi-bar">
-    <div class="kpi-cell">
-      <div class="kpi-icon">&#128193;</div>
-      <div><div class="kpi-val" id="kpi-total">&#8212;</div><div class="kpi-lbl">Total Runs</div></div>
-    </div>
-    <div class="kpi-cell pass">
-      <div class="kpi-icon">&#9989;</div>
-      <div><div class="kpi-val" id="kpi-pass">&#8212;</div><div class="kpi-lbl">Passed</div></div>
-    </div>
-    <div class="kpi-cell risk">
-      <div class="kpi-icon">&#9888;&#65039;</div>
-      <div><div class="kpi-val" id="kpi-risk">&#8212;</div><div class="kpi-lbl">At Risk</div></div>
-    </div>
-    <div class="kpi-cell fail">
-      <div class="kpi-icon">&#10060;</div>
-      <div><div class="kpi-val" id="kpi-fail">&#8212;</div><div class="kpi-lbl">Failed</div></div>
-    </div>
-    <div class="kpi-cell accent">
-      <div class="kpi-icon">&#128202;</div>
-      <div><div class="kpi-val" id="kpi-avg">&#8212;</div><div class="kpi-lbl">Avg Risk Score</div></div>
     </div>
   </div>
 
-  <!-- BODY -->
-  <div id="body">
+  <!-- Main Container -->
+  <div class="container">
 
-    <!-- LEFT: RUN LIST -->
-    <div id="run-panel">
-      <div class="panel-header">
-        <span class="panel-header-title">All Runs</span>
-        <button class="panel-header-action" onclick="loadRuns()">&#8634; Refresh</button>
-      </div>
-      <input id="run-search" type="text" placeholder="Search runs&#8230;" oninput="filterRuns(this.value)" />
-      <div id="run-list">
-        <div class="center-empty" style="height:auto;padding:40px 10px;">
-          <div class="ce-icon">&#128260;</div>
-          <p>Loading runs&#8230;</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- CENTER -->
-    <div id="center">
-
-      <!-- Stage Pipeline -->
-      <div id="stage-panel">
-        <div id="stage-panel-label">
-          <span>Pipeline Stages</span>
-          <span id="stage-run-id">Select a run &#8594;</span>
-        </div>
-        <div id="stage-track">
-          <div style="color:var(--text3);font-size:11px;font-family:Inter,sans-serif;padding:4px 8px;">
-            Select a run from the left panel to see its pipeline
-          </div>
-        </div>
+    <!-- KPI Overview Cards -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-title">Contracts Processed</div>
+        <div class="kpi-value" id="kpi-total">0</div>
+        <div class="kpi-sub" id="kpi-rate-sub">100% Success Rate</div>
       </div>
 
-      <!-- Run Meta Strip -->
-      <div id="run-meta-strip" style="display:none;"></div>
+      <div class="kpi-card">
+        <div class="kpi-title">Avg Processing Duration</div>
+        <div class="kpi-value" id="kpi-avg-time">0.0s</div>
+        <div class="kpi-sub">End-to-end pipeline latency</div>
+      </div>
 
-      <!-- Log Panel -->
-      <div id="log-panel">
-        <div id="log-toolbar">
-          <span class="lt-label">Logs</span>
-          <input id="log-search" type="text" placeholder="Search log messages&#8230;" oninput="applyLogFilter()" />
-          <button class="level-btn active ALL" data-level="ALL"     onclick="setLevel(this)">All</button>
-          <button class="level-btn INFO"       data-level="INFO"    onclick="setLevel(this)">Info</button>
-          <button class="level-btn WARNING"    data-level="WARNING" onclick="setLevel(this)">Warn</button>
-          <button class="level-btn ERROR"      data-level="ERROR"   onclick="setLevel(this)">Error</button>
-          <label class="auto-scroll-toggle on" id="auto-scroll-toggle" onclick="toggleAutoScroll()">
-            <div class="toggle-track"><div class="toggle-thumb"></div></div>
-            <span>Auto-scroll</span>
-          </label>
-          <span class="log-count" id="log-count">0 entries</span>
-        </div>
-        <div id="log-stream">
-          <div class="center-empty">
-            <div class="ce-icon">&#128203;</div>
-            <h3>No Run Selected</h3>
-            <p>Pick any run from the left panel to view its structured log stream here.</p>
-          </div>
-        </div>
+      <div class="kpi-card">
+        <div class="kpi-title">Compliant vs Risk</div>
+        <div class="kpi-value" style="color: var(--risk)" id="kpi-risk-ratio">0 / 0</div>
+        <div class="kpi-sub" id="kpi-risk-sub">Pass vs Flagged contracts</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-title">Failed Executions</div>
+        <div class="kpi-value" style="color: var(--pass)" id="kpi-failed">0</div>
+        <div class="kpi-sub" id="kpi-failed-sub">Zero pipeline crashes</div>
       </div>
     </div>
 
-    <!-- RIGHT: FINDINGS -->
-    <div id="findings-panel">
-      <div class="panel-header">
-        <span class="panel-header-title">Policy Findings</span>
-        <span id="findings-count" style="font-size:10px;color:var(--text3);">&#8212;</span>
+    <!-- Agent Health Grid -->
+    <div>
+      <div class="section-header">
+        <div class="section-title">
+          <span>🛡️</span>
+          <span>AI Compliance Agent Health & Latency Grid</span>
+        </div>
+        <span style="font-size: 12px; color: var(--text3);">Live OpenTelemetry Metrics per MAF Agent</span>
       </div>
-      <div id="findings-scroll">
-        <div class="findings-empty">
-          <div class="fe-icon">&#128269;</div>
-          <p>Select a run to view policy-level compliance findings</p>
+
+      <div class="agent-grid" id="agent-grid">
+        <div style="text-align: center; grid-column: 1/-1; padding: 30px; color: var(--text3);">Loading agent telemetry...</div>
+      </div>
+    </div>
+
+    <!-- Recent Executions -->
+    <div class="card">
+      <div class="section-header">
+        <div class="section-title">
+          <span>⚡</span>
+          <span>Recent Contract Compliance Executions</span>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <input type="text" id="exec-search" placeholder="Search execution ID or filename..." 
+            style="background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 5px 10px; font-size: 12px; color: var(--text); outline: none; width: 250px;"
+            oninput="renderExecutionsTable()" />
         </div>
       </div>
-      <div id="risk-breakdown-panel">
-        <div class="rb-empty">Select a completed run to see the risk score breakdown</div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 140px;">Execution ID</th>
+              <th>Contract Document</th>
+              <th style="width: 110px;">Doc Type</th>
+              <th style="width: 110px;">Status</th>
+              <th style="width: 100px;">Risk Level</th>
+              <th style="width: 100px; text-align: right;">Duration</th>
+              <th style="width: 110px; text-align: right;">Time</th>
+            </tr>
+          </thead>
+          <tbody id="exec-tbody">
+            <tr><td colspan="7" style="text-align: center; padding: 24px; color: var(--text3);">Loading executions...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Errors & Exceptions Log -->
+    <div class="card">
+      <div class="section-header">
+        <div class="section-title">
+          <span>🚨</span>
+          <span>Recent Exceptions & Telemetry Warnings</span>
+        </div>
+        <button class="btn" style="font-size: 11px; padding: 4px 8px;" onclick="loadErrors()">↺ Refresh Errors</button>
+      </div>
+
+      <div class="table-wrap" style="max-height: 350px; overflow-y: auto;">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 100px;">Time</th>
+              <th style="width: 80px;">Severity</th>
+              <th style="width: 150px;">AI Agent / Source</th>
+              <th style="width: 140px;">Execution ID</th>
+              <th>Error Details</th>
+            </tr>
+          </thead>
+          <tbody id="error-tbody">
+            <tr><td colspan="5" style="text-align: center; padding: 20px; color: var(--text3);">No error events recorded</td></tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
   </div>
-</div>
-<div id="toast"></div>
-<script>
-const STAGES=[
-  {key:'ingestion',label:'Ingestion',icon:'📥'},
-  {key:'classification',label:'Classify',icon:'🏷️'},
-  {key:'obligation_extraction',label:'Obligations',icon:'📋'},
-  {key:'policy_matching',label:'Policies',icon:'⚖️'},
-  {key:'compliance_validation',label:'Validate',icon:'✅'},
-  {key:'risk_scoring',label:'Risk Score',icon:'📊'},
-  {key:'evidence_generation',label:'Evidence',icon:'🖼️'},
-];
-let allRuns=[],selectedRunId=null,allLogs=[],activeLevel='ALL',autoScroll=true;
 
-document.addEventListener('DOMContentLoaded',()=>{
-  loadStats();loadRuns();
-  setInterval(loadStats,15000);
-  setInterval(()=>{if(!selectedRunId)loadRuns();},20000);
-});
+  <!-- KQL Query Modal -->
+  <div class="modal-backdrop" id="kql-modal" onclick="if(event.target===this)closeKqlModal()">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div style="font-weight: 700; font-size: 14.5px; display: flex; align-items: center; gap: 8px;">
+          <span>📋</span>
+          <span>Azure Monitor & Application Insights KQL Query Library</span>
+        </div>
+        <button class="btn" style="padding: 4px 8px;" onclick="closeKqlModal()">✕</button>
+      </div>
+      <div class="modal-body" id="kql-body">
+        <div style="text-align: center; padding: 30px; color: var(--text3);">Loading KQL query templates...</div>
+      </div>
+    </div>
+  </div>
 
-async function loadStats(){
-  try{
-    const s=await fetch('/api/stats').then(r=>r.json());
-    document.getElementById('kpi-total').textContent=s.total_runs??'—';
-    document.getElementById('kpi-pass').textContent=s.passed??'—';
-    document.getElementById('kpi-risk').textContent=s.at_risk??'—';
-    document.getElementById('kpi-fail').textContent=s.failed??'—';
-    document.getElementById('kpi-avg').textContent=s.avg_risk_score!=null?s.avg_risk_score:'—';
-  }catch(e){}
-}
+  <script>
+    let allExecutions = [];
+    let allAgents = [];
+    let allErrors = [];
+    let kqlQueries = [];
 
-async function loadRuns(){
-  try{
-    const data=await fetch('/api/runs?limit=200').then(r=>r.json());
-    allRuns=data;renderRunList(allRuns);
-  }catch(e){
-    document.getElementById('run-list').innerHTML='<div class="center-empty" style="height:auto;padding:30px 10px;"><div class="ce-icon">⚠️</div><p>Failed to load runs</p></div>';
-  }
-}
-
-function renderRunList(runs){
-  const el=document.getElementById('run-list');
-  if(!runs.length){el.innerHTML='<div class="center-empty" style="height:auto;padding:40px 10px;"><div class="ce-icon">📂</div><p>No runs yet</p></div>';return;}
-  el.innerHTML=runs.map(r=>{
-    const status=r.processing_status||'PENDING';
-    const cls=statusClass(status,r.overall_status);
-    const badge=displayStatus(status,r.overall_status);
-    const score=r.risk_score!=null?'Score: '+r.risk_score:'';
-    const ts=r.created_at?relativeTime(r.created_at):'';
-    const active=r.run_id===selectedRunId?' active':'';
-    return `<div class="run-item ${cls}${active}" onclick="selectRun('${r.run_id}')" id="ri-${r.run_id}">
-      <div class="ri-name" title="${escHtml(r.file_name)}">${escHtml(r.file_name)}</div>
-      <div class="ri-foot"><span class="ri-badge ${badge}">${badge}</span><span class="ri-score">${score}</span></div>
-      <div style="padding-left:6px;margin-top:3px;"><span class="ri-time">${ts}</span></div>
-    </div>`;
-  }).join('');
-}
-
-function filterRuns(q){
-  const f=allRuns.filter(r=>r.file_name.toLowerCase().includes(q.toLowerCase())||r.run_id.toLowerCase().includes(q.toLowerCase()));
-  renderRunList(f);
-}
-
-function statusClass(p,o){
-  if(p==='COMPLETED')return o||'PASS';
-  if(p==='SKIPPED')return 'SKIPPED';
-  if(p==='FAILED')return 'FAILED';
-  if(p==='PROCESSING'||p==='PENDING')return 'PROCESSING';
-  return 'PASS';
-}
-function displayStatus(p,o){
-  if(p==='COMPLETED')return o||'PASS';
-  if(p==='SKIPPED')return 'SKIPPED';
-  if(p==='FAILED')return 'FAILED';
-  if(p==='PROCESSING')return 'PROCESSING';
-  return 'PENDING';
-}
-
-async function selectRun(runId){
-  selectedRunId=runId;
-  document.querySelectorAll('.run-item').forEach(el=>el.classList.remove('active'));
-  const ri=document.getElementById('ri-'+runId);
-  if(ri)ri.classList.add('active');
-  document.getElementById('run-meta-strip').style.display='none';
-  document.getElementById('risk-breakdown-panel').innerHTML='<div class="rb-empty">⏳ Loading…</div>';
-  renderStages({},null);renderFindings([]);
-  document.getElementById('log-stream').innerHTML='<div class="log-empty"><div class="le-icon">⏳</div><p>Loading logs…</p></div>';
-  await Promise.all([loadRunDetail(runId),loadRunLogs(runId),loadRiskBreakdown(runId)]);
-}
-
-async function loadRunDetail(runId){
-  try{
-    const run=await fetch('/api/runs/'+runId).then(r=>r.json());
-    renderMetaStrip(run);renderStages({},run);renderFindings(run.findings||[]);
-  }catch(e){showToast('Failed to load run detail');}
-}
-
-function renderMetaStrip(run){
-  const strip=document.getElementById('run-meta-strip');
-  const badge=displayStatus(run.processing_status,run.overall_status);
-  const chips=[];
-  chips.push(`<span class="risk-badge-lg ${badge}">${badge}</span>`);
-  chips.push(metaChip('📄','File',run.file_name));
-  chips.push(metaChip('🏷️','Type',run.document_type||'—'));
-  if(run.risk_score!=null)chips.push(metaChip('⚠️','Risk Score',run.risk_score));
-  if(run.risk_level)chips.push(metaChip('🎯','Risk Level',run.risk_level));
-  if(run.obligation_count!=null)chips.push(metaChip('📋','Obligations',run.obligation_count));
-  if(run.created_at)chips.push(metaChip('🕐','Started',fmtTime(run.created_at)));
-  if(run.completed_at)chips.push(metaChip('✅','Completed',fmtTime(run.completed_at)));
-  chips.push(metaChip('🔑','Run ID',run.run_id.substring(0,8)+'…'));
-  strip.innerHTML=chips.join('');strip.style.display='flex';
-}
-function metaChip(icon,key,val){
-  return `<span class="meta-chip">${icon} <span class="mc-key">${key}:</span> <span class="mc-val">${escHtml(String(val))}</span></span>`;
-}
-
-function renderStages(stageStatuses,run){
-  const track=document.getElementById('stage-track');
-  const runIdEl=document.getElementById('stage-run-id');
-  if(!run){
-    track.innerHTML='<div style="color:var(--text3);font-size:11px;font-family:Inter,sans-serif;">Select a run to see its pipeline</div>';
-    runIdEl.textContent='Select a run →';return;
-  }
-  runIdEl.textContent='Run: '+run.run_id.substring(0,8)+'…';
-  const isSkipped=run.processing_status==='SKIPPED';
-  const isComplete=run.processing_status==='COMPLETED';
-  const isFailed=run.processing_status==='FAILED';
-  let html='';
-  STAGES.forEach((s,i)=>{
-    let state='idle',dur='';
-    if(stageStatuses[s.key]){
-      state=stageStatuses[s.key].state||'idle';
-      if(stageStatuses[s.key].duration)dur=stageStatuses[s.key].duration+'ms';
-    } else if(isComplete){
-      if(isSkipped&&i>1)state='skipped';else state='done';
-    } else if(isFailed){
-      state=i===0?'failed':'idle';
-    } else if(isSkipped){
-      if(i<=1)state='done';else state='skipped';
+    async function refreshAll(manual = false) {
+      await Promise.all([
+        loadOverview(),
+        loadAgents(),
+        loadExecutions(),
+        loadErrors()
+      ]);
+      if (manual) toast('Telemetry updated');
     }
-    html+=`<div class="stage-node">
-      <div class="stage-bubble ${state}">${s.icon}</div>
-      <div class="stage-label">${s.label}</div>
-      <div class="stage-status-txt ${state}">${state==='idle'?'—':state}</div>
-      ${dur?`<div class="stage-dur">${dur}</div>`:''}
-    </div>`;
-    if(i<STAGES.length-1){
-      const c=state==='done'?'done':(state==='running'?'running':'');
-      html+=`<div class="stage-connector ${c}"></div>`;
-    }
-  });
-  track.innerHTML=html;
-}
 
-function renderFindings(findings){
-  const el=document.getElementById('findings-scroll');
-  const cnt=document.getElementById('findings-count');
-  if(!findings.length){
-    el.innerHTML='<div class="findings-empty"><div class="fe-icon">🔍</div><p>No findings for this run</p></div>';
-    cnt.textContent='—';return;
-  }
-  cnt.textContent=findings.length+' findings';
-  const ORDER={NON_COMPLIANT:0,PARTIAL:1,NOT_FOUND:2,COMPLIANT:3};
-  const sorted=[...findings].sort((a,b)=>(ORDER[a.status]??9)-(ORDER[b.status]??9));
-  el.innerHTML=sorted.map(f=>`
-    <div class="finding-card ${f.status||''}">
-      <div class="fc-head"><span class="fc-pid">${escHtml(f.policy_id||'')}</span><span class="fc-sev ${f.severity||''}">${f.severity||''}</span></div>
-      <div class="fc-name">${escHtml(f.policy_name||'')}</div>
-      <span class="fc-status-badge ${f.status||''}">${(f.status||'').replace('_',' ')}</span>
-      ${f.clause_ref?`<div style="font-size:9px;color:var(--text3);padding-left:6px;margin-bottom:4px;">📌 ${escHtml(f.clause_ref)}</div>`:''}
-      <div class="fc-finding">${escHtml((f.finding||'').substring(0,200))}${(f.finding||'').length>200?'…':''}</div>
-    </div>`).join('');
-}
+    async function loadOverview() {
+      try {
+        const res = await fetch('/api/monitoring/overview');
+        if (!res.ok) return;
+        const d = await res.json();
 
-async function loadRunLogs(runId){
-  try{
-    const data=await fetch('/api/logs?run_id='+encodeURIComponent(runId)+'&limit=500').then(r=>r.json());
-    allLogs=data.logs||[];applyLogFilter();
-    const stageStatuses={};
-    allLogs.forEach(log=>{
-      const stage=log.stage;const status=log.status;const dur=log.duration_ms;
-      if(stage&&STAGES.find(s=>s.key===stage)){
-        if(!stageStatuses[stage])stageStatuses[stage]={};
-        if(status==='DONE'||status==='COMPLETED')stageStatuses[stage].state='done';
-        else if(status==='RUNNING')stageStatuses[stage].state='running';
-        else if(status==='FAILED')stageStatuses[stage].state='failed';
-        if(dur)stageStatuses[stage].duration=Math.round(dur);
+        const total = d.total_contracts || 0;
+        document.getElementById('kpi-total').textContent = total;
+        document.getElementById('kpi-rate-sub').textContent = total === 0 ? 'No contracts analyzed yet' : `${d.success_rate}% Success Rate (${d.successful} passed)`;
+        document.getElementById('kpi-avg-time').textContent = `${d.average_processing_time}s`;
+        document.getElementById('kpi-risk-ratio').textContent = `${d.compliant} / ${d.non_compliant}`;
+        document.getElementById('kpi-risk-sub').textContent = total === 0 ? 'No active findings' : `${d.high_risk} High Risk, ${d.medium_risk} Med, ${d.low_risk} Low`;
+
+        const failedEl = document.getElementById('kpi-failed');
+        failedEl.textContent = d.failed || 0;
+        failedEl.style.color = d.failed > 0 ? 'var(--fail)' : 'var(--pass)';
+        document.getElementById('kpi-failed-sub').textContent = total === 0 ? 'No errors recorded' : (d.failed === 0 ? 'Zero pipeline crashes' : `${d.failed} unhandled exceptions`);
+
+        const azureBadge = document.getElementById('azure-status-badge');
+        if (azureBadge) {
+          if (d.azure_monitor_enabled) {
+            azureBadge.textContent = '🟢 Azure App Insights Connected';
+            azureBadge.style.background = 'rgba(16,185,129,0.15)';
+            azureBadge.style.color = 'var(--pass)';
+          } else {
+            azureBadge.textContent = '🟡 Local OpenTelemetry Active';
+            azureBadge.style.background = 'rgba(245,158,11,0.15)';
+            azureBadge.style.color = 'var(--risk)';
+          }
+        }
+      } catch (e) {
+        console.error('Failed to load overview:', e);
       }
-    });
-    const runData=allRuns.find(r=>r.run_id===runId);
-    if(runData)renderStages(stageStatuses,runData);
-  }catch(e){
-    document.getElementById('log-stream').innerHTML='<div class="log-empty"><div class="le-icon">⚠️</div><p>Failed to load logs for this run</p></div>';
-  }
-}
-
-function applyLogFilter(){
-  const query=(document.getElementById('log-search').value||'').toLowerCase();
-  const filtered=allLogs.filter(log=>{
-    if(activeLevel!=='ALL'&&(log.level||'').toUpperCase()!==activeLevel)return false;
-    if(query){const h=JSON.stringify(log).toLowerCase();return h.includes(query);}
-    return true;
-  });
-  renderLogs(filtered);
-}
-
-function renderLogs(logs){
-  const el=document.getElementById('log-stream');
-  const cnt=document.getElementById('log-count');
-  cnt.textContent=logs.length+' entries';
-  if(!selectedRunId){
-    el.innerHTML='<div class="center-empty"><div class="ce-icon">📋</div><h3>No Run Selected</h3><p>Pick any run from the left panel to view its structured log stream here.</p></div>';
-    return;
-  }
-  if(!logs.length){el.innerHTML='<div class="log-empty"><div class="le-icon">🔍</div><p>No log entries match your filter</p></div>';return;}
-  const query=(document.getElementById('log-search').value||'').toLowerCase();
-  el.innerHTML=logs.map(log=>{
-    const level=(log.level||'INFO').toUpperCase();
-    const ts=log.timestamp?fmtTimeShort(log.timestamp):'';
-    const stage=log.stage?`[${log.stage}]`:'';
-    const event=log.event||log.message||'';
-    const agent=log.agent?' agent='+log.agent:'';
-    const status=log.status?' status='+log.status:'';
-    const dur=log.duration_ms?' dur='+Math.round(log.duration_ms)+'ms':'';
-    const err=log.error_message?' ⚠️ '+log.error_message:'';
-    const msg=highlight(escHtml(event+agent+status+dur+err),query);
-    return `<div class="log-row ${level}">
-      <span class="log-ts">${ts}</span>
-      <span class="log-level ${level}">${level}</span>
-      <span class="log-stage">${escHtml(stage)}</span>
-      <span class="log-event">${msg}</span>
-    </div>`;
-  }).join('');
-  if(autoScroll)el.scrollTop=el.scrollHeight;
-}
-
-function highlight(text,query){
-  if(!query)return text;
-  const re=new RegExp(escRegex(query),'gi');
-  return text.replace(re,m=>`<span class="kw">${m}</span>`);
-}
-
-function setLevel(btn){
-  activeLevel=btn.dataset.level;
-  document.querySelectorAll('.level-btn').forEach(b=>b.classList.remove('active','ALL','INFO','WARNING','ERROR'));
-  btn.classList.add('active',btn.dataset.level);
-  applyLogFilter();
-}
-
-function toggleAutoScroll(){
-  autoScroll=!autoScroll;
-  const tog=document.getElementById('auto-scroll-toggle');
-  if(autoScroll)tog.classList.add('on');else tog.classList.remove('on');
-  if(autoScroll){const el=document.getElementById('log-stream');el.scrollTop=el.scrollHeight;}
-}
-
-async function refreshAll(){
-  const btn=document.getElementById('refresh-btn');
-  btn.textContent='⏳ Refreshing…';btn.disabled=true;
-  await Promise.all([loadStats(),loadRuns()]);
-  if(selectedRunId)await Promise.all([loadRunDetail(selectedRunId),loadRunLogs(selectedRunId)]);
-  btn.textContent='↺ Refresh';btn.disabled=false;
-  showToast('✅ Data refreshed');
-}
-
-function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-function escRegex(s){return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');}
-function parseTs(iso){if(!iso)return null;// If no timezone info, treat as UTC
-if(!iso.endsWith('Z')&&!iso.includes('+')&&iso.length<=26){iso=iso.replace(' ','T')+'Z';}return new Date(iso);}
-function relativeTime(iso){const d=parseTs(iso);if(!d)return '';const diff=Date.now()-d.getTime();const m=Math.floor(diff/60000);if(m<1)return 'just now';if(m<60)return m+'m ago';const h=Math.floor(m/60);if(h<24)return h+'h ago';return Math.floor(h/24)+'d ago';}
-function fmtTime(iso){const d=parseTs(iso);if(!d)return '—';return d.toLocaleString(undefined,{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});}
-function fmtTimeShort(iso){const d=parseTs(iso);if(!d)return '';return d.toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit',second:'2-digit'});}
-function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
-
-async function loadRiskBreakdown(runId) {
-  const panel = document.getElementById('risk-breakdown-panel');
-  panel.innerHTML = '<div class="rb-empty">⏳ Loading breakdown…</div>';
-  try {
-    const d = await fetch('/api/runs/' + runId + '/risk-breakdown').then(r => r.json());
-    if (d.detail) {
-      panel.innerHTML = '<div class="rb-empty">No risk breakdown available for this run</div>';
-      return;
     }
-    const rl = d.risk_level || 'LOW';
-    const score = d.score != null ? d.score : '—';
-    const penaltyClass = p => p === 0 ? 'zero' : p <= 5 ? 'low' : p <= 15 ? 'med' : p <= 30 ? 'high' : 'crit';
-    const maxPenalty = Math.max(...(d.contributors || []).map(c => c.penalty), 1);
 
-    let html = `<div class="rb-header">
-      <span class="rb-title">⚠️ Risk Score Breakdown</span>
-      <span class="rb-score-pill">
-        <div class="rb-score-circle ${rl}">${score}</div>
-        <span style="font-size:10px;color:var(--text3);">${rl}</span>
-      </span>
-    </div>
-    <div class="rb-explanation">${escHtml(d.score_explanation || '')}</div>
-    <div class="rb-legend">
-      <span class="rb-leg-chip"><span class="dot" style="background:var(--fail)"></span>CRITICAL = 40 pts</span>
-      <span class="rb-leg-chip"><span class="dot" style="background:var(--warn)"></span>HIGH = 25 pts</span>
-      <span class="rb-leg-chip"><span class="dot" style="background:var(--risk)"></span>MEDIUM = 10 pts</span>
-      <span class="rb-leg-chip"><span class="dot" style="background:var(--info)"></span>LOW = 5 pts</span>
-      <span class="rb-leg-chip"><span class="dot" style="background:var(--text3)"></span>NON_COMPLIANT/NOT_FOUND ×1.0</span>
-      <span class="rb-leg-chip"><span class="dot" style="background:var(--text3)"></span>PARTIAL ×0.5</span>
-      <span class="rb-leg-chip"><span class="dot" style="background:var(--pass)"></span>COMPLIANT ×0 (no penalty)</span>
-    </div>`;
+    async function loadAgents() {
+      try {
+        const res = await fetch('/api/monitoring/agents');
+        if (!res.ok) return;
+        const data = await res.json();
+        allAgents = data.agents || [];
+        renderAgentGrid();
+      } catch (e) {
+        console.error('Failed to load agent health:', e);
+      }
+    }
 
-    if (!d.contributors || !d.contributors.length) {
-      html += '<div class="rb-empty">No contributors found</div>';
-    } else {
-      d.contributors.forEach(c => {
-        const pc = penaltyClass(c.penalty);
-        const pct = Math.round((c.penalty / maxPenalty) * 100);
-        html += `<div class="rb-contributor">
-          <div class="rb-contrib-head">
-            <span class="rb-pid">${escHtml(c.policy_id || '')}</span>
-            <span class="rb-penalty ${pc}">+${c.penalty} pts</span>
+    function renderAgentGrid() {
+      const grid = document.getElementById('agent-grid');
+      if (!allAgents.length) {
+        grid.innerHTML = '<div style="text-align:center;color:var(--text3);padding:20px;">No agents found</div>';
+        return;
+      }
+
+      grid.innerHTML = allAgents.map(a => `
+        <div class="agent-card">
+          <div class="agent-header">
+            <div>
+              <div style="display:flex;align-items:center;gap:6px">
+                <span style="font-size:16px">${a.icon}</span>
+                <span class="agent-name">${a.name}</span>
+              </div>
+              <div class="agent-class">${a.agent_class}</div>
+            </div>
+            <span class="badge badge-${a.status}">${a.status}</span>
           </div>
-          <div class="rb-contrib-name">${escHtml(c.policy_name || '')}</div>
-          <div class="rb-formula">${escHtml(c.formula || '')}</div>
-          <div class="rb-reason">${escHtml(c.status_reason || '')}</div>
-          <div class="rb-bar-wrap"><div class="rb-bar ${pc}" style="width:${pct}%"></div></div>
-        </div>`;
-      });
-    }
-    panel.innerHTML = html;
-  } catch(e) {
-    panel.innerHTML = '<div class="rb-empty">⚠️ Could not load breakdown</div>';
-  }
-}
 
-</script>
+          <div class="agent-meta-row">
+            <div>
+              <div class="agent-meta-lbl">Avg Latency</div>
+              <div class="agent-meta-val" style="color:${a.avg_duration_ms > 4000 ? 'var(--risk)' : 'var(--text)'}">
+                ${a.total_calls === 0 ? '—' : `${a.avg_duration_ms} ms`}
+              </div>
+            </div>
+            <div>
+              <div class="agent-meta-lbl">Success Rate</div>
+              <div class="agent-meta-val" style="color:${a.total_calls === 0 ? 'var(--text3)' : (a.success_rate >= 90 ? 'var(--pass)' : 'var(--fail)')}">
+                ${a.total_calls === 0 ? '—' : `${a.success_rate}%`}
+              </div>
+            </div>
+            <div>
+              <div class="agent-meta-lbl">Total Executions</div>
+              <div class="agent-meta-val">${a.total_calls}</div>
+            </div>
+            <div>
+              <div class="agent-meta-lbl">Recent Errors</div>
+              <div class="agent-meta-val" style="color:${a.recent_errors > 0 ? 'var(--fail)' : 'var(--text3)'}">${a.recent_errors}</div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function loadExecutions() {
+      try {
+        const res = await fetch('/api/monitoring/executions?limit=50');
+        if (!res.ok) return;
+        const data = await res.json();
+        allExecutions = data.executions || [];
+        renderExecutionsTable();
+      } catch (e) {
+        console.error('Failed to load executions:', e);
+      }
+    }
+
+    function renderExecutionsTable() {
+      const tbody = document.getElementById('exec-tbody');
+      const q = (document.getElementById('exec-search')?.value || '').toLowerCase();
+
+      const filtered = allExecutions.filter(ex => {
+        if (!q) return true;
+        return (ex.execution_id || '').toLowerCase().includes(q) || (ex.document_name || '').toLowerCase().includes(q);
+      });
+
+      if (!filtered.length) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text3);">No matching executions found</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(ex => {
+        const timeStr = ex.created_at ? new Date(ex.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '—';
+        const durStr = ex.duration_seconds !== null ? `${ex.duration_seconds}s` : '—';
+        const status = ex.compliance_status || ex.status || 'UNKNOWN';
+
+        return `
+          <tr>
+            <td>
+              <span style="font-family:var(--mono);font-size:11px;color:var(--accent);cursor:pointer;display:inline-flex;align-items:center;gap:4px" 
+                title="Click to copy ID" onclick="copyText('${ex.execution_id}')">
+                <span>${(ex.execution_id || '').substring(0, 10)}…</span>
+                <span style="font-size:10px;opacity:0.6">📋</span>
+              </span>
+            </td>
+            <td>
+              <strong style="color:var(--text);font-size:12px">${ex.document_name || 'Document'}</strong>
+            </td>
+            <td><span style="font-size:11px;color:var(--text3)">${ex.document_type || 'Contract'}</span></td>
+            <td><span class="status-pill status-${status}">${status}</span></td>
+            <td>
+              <span style="font-weight:700;font-size:11px;color:${ex.risk_level==='CRITICAL'?'var(--fail)':(ex.risk_level==='HIGH'?'var(--risk)':'var(--pass)')}">
+                ${ex.risk_level} ${ex.risk_score !== null ? `(${ex.risk_score})` : ''}
+              </span>
+            </td>
+            <td style="text-align:right;font-family:var(--mono);font-size:11.5px">${durStr}</td>
+            <td style="text-align:right;font-size:11px;color:var(--text3)">${timeStr}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    async function loadErrors() {
+      try {
+        const res = await fetch('/api/monitoring/errors?limit=50');
+        if (!res.ok) return;
+        const data = await res.json();
+        allErrors = data.errors || [];
+        renderErrorsTable();
+      } catch (e) {
+        console.error('Failed to load error logs:', e);
+      }
+    }
+
+    function renderErrorsTable() {
+      const tbody = document.getElementById('error-tbody');
+      if (!allErrors.length) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--pass);">🟢 No unhandled errors or exceptions recorded</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = allErrors.map(err => {
+        const timeStr = err.timestamp ? new Date(err.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '—';
+        const isErr = (err.level || '').toUpperCase() === 'ERROR';
+
+        return `
+          <tr>
+            <td style="font-size:11px;color:var(--text3);white-space:nowrap">${timeStr}</td>
+            <td><span class="badge ${isErr ? 'badge-unhealthy' : 'badge-degraded'}">${err.level || 'WARN'}</span></td>
+            <td><strong style="color:var(--text);font-size:12px">${err.agent || err.stage}</strong></td>
+            <td><span style="font-family:var(--mono);font-size:10.5px;color:var(--text2)">${(err.execution_id||'').substring(0,8)}…</span></td>
+            <td style="font-size:12px;color:var(--text);line-height:1.4">${err.error_message || 'Unknown error'}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    async function openKqlModal() {
+      const modal = document.getElementById('kql-modal');
+      const body = document.getElementById('kql-body');
+      modal.style.display = 'flex';
+
+      if (!kqlQueries.length) {
+        try {
+          const res = await fetch('/api/monitoring/kql-queries');
+          const d = await res.json();
+          kqlQueries = d.queries || [];
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      body.innerHTML = kqlQueries.map((q, idx) => `
+        <div class="kql-card">
+          <div class="kql-title">
+            <span>${q.title}</span>
+            <button class="btn" style="font-size:10.5px;padding:3px 8px;" onclick="copyText(${JSON.stringify(q.kql)})">Copy KQL</button>
+          </div>
+          <div class="kql-desc">${q.description}</div>
+          <pre class="kql-code">${escapeHtml(q.kql)}</pre>
+        </div>
+      `).join('');
+    }
+
+    function closeKqlModal() {
+      document.getElementById('kql-modal').style.display = 'none';
+    }
+
+    function copyText(text) {
+      navigator.clipboard.writeText(text).then(() => toast('Copied to clipboard ✓'));
+    }
+
+    function escapeHtml(str) {
+      return (str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function toast(msg) {
+      let t = document.getElementById('toast-el');
+      if (!t) {
+        t = document.createElement('div');
+        t.id = 'toast-el';
+        t.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#1e293b;border:1px solid rgba(255,255,255,0.15);color:#fff;padding:10px 18px;border-radius:8px;font-size:12.5px;font-weight:600;z-index:9999;box-shadow:0 8px 24px rgba(0,0,0,0.5);transition:opacity 0.2s';
+        document.body.appendChild(t);
+      }
+      t.textContent = msg;
+      t.style.opacity = '1';
+      setTimeout(() => { if (t) t.style.opacity = '0'; }, 2500);
+    }
+
+    // Auto Refresh Every 4 seconds
+    setInterval(() => refreshAll(false), 4000);
+    window.addEventListener('DOMContentLoaded', () => refreshAll(false));
+  </script>
 </body>
 </html>

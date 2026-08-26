@@ -66,6 +66,10 @@ CREATE TABLE IF NOT EXISTS runs (
     evidence_json_path  TEXT,
     processing_status   TEXT NOT NULL DEFAULT 'PENDING',
     error_message       TEXT,
+    admin_decision      TEXT,
+    admin_notes         TEXT,
+    admin_decided_at    TEXT,
+    admin_reviewer      TEXT,
     created_at          TEXT NOT NULL,
     completed_at        TEXT
 );
@@ -92,9 +96,21 @@ CREATE TABLE IF NOT EXISTS recommendations (
 
 
 def init_db() -> None:
-    """Create tables if they don't exist."""
+    """Create tables if they don't exist and run column migrations."""
     with get_db() as conn:
         conn.executescript(SCHEMA_SQL)
+        # Migrate existing runs table if new columns are missing
+        existing_cols = [r["name"] for r in conn.execute("PRAGMA table_info(runs)").fetchall()]
+        for col, ctype in [
+            ("admin_decision", "TEXT"),
+            ("admin_notes", "TEXT"),
+            ("admin_decided_at", "TEXT"),
+            ("admin_reviewer", "TEXT"),
+        ]:
+            if col not in existing_cols:
+                conn.execute(f"ALTER TABLE runs ADD COLUMN {col} {ctype}")
+        # Clean up any stale processing runs left over from server restarts
+        conn.execute("UPDATE runs SET processing_status='FAILED', error_message='Interrupted by server restart' WHERE processing_status='PROCESSING'")
 
 
 # ──────────────────────────────────────────────
@@ -266,3 +282,76 @@ def get_stats() -> Dict:
             "at_risk": risk,
             "avg_risk_score": round(avg_score or 0, 1),
         }
+
+
+def set_admin_decision(run_id: str, decision: str, notes: str = "", reviewer: str = "admin@compliance.ai") -> bool:
+    """Set or update administrative decision on a flagged contract run."""
+    with get_db() as conn:
+        now = datetime.now(timezone.utc).isoformat()
+        new_status = "APPROVED" if decision == "APPROVED" else ("REJECTED" if decision == "REJECTED" else None)
+        if new_status:
+            res = conn.execute(
+                """
+                UPDATE runs SET admin_decision=?, admin_notes=?, admin_decided_at=?, admin_reviewer=?, overall_status=?
+                WHERE run_id=?
+                """,
+                (decision, notes, now, reviewer, new_status, run_id),
+            )
+        else:
+            res = conn.execute(
+                """
+                UPDATE runs SET admin_decision=?, admin_notes=?, admin_decided_at=?, admin_reviewer=?
+                WHERE run_id=?
+                """,
+                (decision, notes, now, reviewer, run_id),
+            )
+        return res.rowcount > 0
+
+
+def get_flagged_runs() -> List[Dict]:
+    """Return all flagged runs (RISK, FAIL, APPROVED, or with admin_decision) for real-time admin review desk."""
+    with get_db() as conn:
+        rows = conn.execute(
+            """
+            SELECT * FROM runs
+            WHERE (overall_status IN ('RISK', 'FAIL', 'APPROVED') OR processing_status = 'FAILED' OR admin_decision IS NOT NULL)
+            ORDER BY created_at DESC
+            """
+        ).fetchall()
+        flagged = []
+        for r in rows:
+            d = dict(r)
+            d["findings_count"] = conn.execute(
+                "SELECT COUNT(*) FROM findings WHERE run_id=?", (d["run_id"],)
+            ).fetchone()[0]
+            flagged.append(d)
+        return flagged
+
+
+def get_admin_stats() -> Dict:
+    """Return key metrics specifically for the admin flagged decisions dashboard."""
+    with get_db() as conn:
+        flagged_count = conn.execute(
+            "SELECT COUNT(*) FROM runs WHERE overall_status IN ('RISK', 'FAIL') OR processing_status='FAILED'"
+        ).fetchone()[0]
+        pending_review = conn.execute(
+            "SELECT COUNT(*) FROM runs WHERE (overall_status IN ('RISK', 'FAIL') OR processing_status='FAILED') AND (admin_decision IS NULL OR admin_decision = '' OR admin_decision = 'PENDING')"
+        ).fetchone()[0]
+        approved = conn.execute(
+            "SELECT COUNT(*) FROM runs WHERE admin_decision = 'APPROVED'"
+        ).fetchone()[0]
+        rejected = conn.execute(
+            "SELECT COUNT(*) FROM runs WHERE admin_decision = 'REJECTED'"
+        ).fetchone()[0]
+        amendment = conn.execute(
+            "SELECT COUNT(*) FROM runs WHERE admin_decision = 'AMENDMENT_REQUESTED'"
+        ).fetchone()[0]
+        return {
+            "flagged_total": flagged_count,
+            "pending_review": pending_review,
+            "approved": approved,
+            "rejected": rejected,
+            "amendment_requested": amendment,
+            "decided_total": approved + rejected + amendment,
+        }
+

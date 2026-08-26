@@ -264,8 +264,10 @@
       padding: 10px 18px; border-radius: 10px; font-size: 16px; font-weight: 700;
     }
     .status-badge-lg.PASS { background: rgba(16,185,129,0.15); color: var(--pass); border: 1px solid rgba(16,185,129,0.3); }
+    .status-badge-lg.APPROVED { background: rgba(16,185,129,0.22); color: var(--pass); border: 1px solid rgba(16,185,129,0.45); box-shadow: 0 0 12px rgba(16,185,129,0.2); }
     .status-badge-lg.RISK { background: rgba(245,158,11,0.15); color: var(--risk); border: 1px solid rgba(245,158,11,0.3); }
     .status-badge-lg.FAIL { background: rgba(239,68,68,0.15);  color: var(--fail); border: 1px solid rgba(239,68,68,0.3); }
+    .status-badge-lg.REJECTED { background: rgba(239,68,68,0.22);  color: var(--fail); border: 1px solid rgba(239,68,68,0.45); }
     .status-badge-lg.SKIPPED { background: rgba(107,114,128,0.15); color: var(--skip); border: 1px solid rgba(107,114,128,0.3); }
 
     /* Findings table */
@@ -372,6 +374,102 @@
     .cc-val.expected { background: rgba(16,185,129,0.04); border: 1px solid rgba(16,185,129,0.15); color: var(--text); }
     .cc-val.actual { background: rgba(239,68,68,0.04); border: 1px solid rgba(239,68,68,0.15); color: var(--text); font-style: italic; }
     .cc-footer { padding: 12px 20px; background: rgba(255,255,255,0.01); font-size: 12px; line-height: 1.5; color: var(--text2); }
+
+    /* ── Demo Auth Screen ── */
+    #auth-modal {
+      position: fixed; inset: 0; z-index: 9999;
+      background: rgba(8, 11, 24, 0.88);
+      backdrop-filter: blur(20px);
+      display: flex; align-items: center; justify-content: center;
+      padding: 20px;
+    }
+    .auth-card {
+      width: 100%; max-width: 440px;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: 0 16px 48px rgba(0,0,0,0.6);
+      padding: 32px 28px;
+      display: flex; flex-direction: column; gap: 20px;
+    }
+    .role-toggle-group {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+    }
+    .role-btn {
+      padding: 12px 10px; border-radius: var(--radius-sm);
+      background: var(--surface); border: 1px solid var(--border);
+      color: var(--text2); cursor: pointer; text-align: center;
+      transition: all 0.2s; font-family: inherit; font-size: 13px;
+    }
+    .role-btn:hover { background: var(--surface2); }
+    .role-btn.active {
+      background: rgba(91,110,245,0.15);
+      border-color: var(--accent);
+      color: #fff; font-weight: 600;
+    }
+
+    /* ── Admin Dashboard & Review Desk ── */
+    #admin-app {
+      display: flex; flex-direction: column; height: 100vh; overflow: hidden;
+      background: var(--bg); position: relative; z-index: 1;
+    }
+    .admin-topbar {
+      height: 56px; padding: 0 24px; display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid var(--border); background: var(--bg2); flex-shrink: 0;
+    }
+    .admin-kpis {
+      display: flex; gap: 12px; padding: 12px 24px; border-bottom: 1px solid var(--border);
+      background: rgba(255,255,255,0.015); flex-shrink: 0;
+    }
+    .admin-kpi-card {
+      flex: 1; background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 10px 16px; display: flex; flex-direction: column; gap: 2px;
+    }
+    .admin-kpi-lbl { font-size: 10px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.8px; }
+    .admin-kpi-val { font-size: 20px; font-weight: 800; line-height: 1.1; }
+    .admin-kpi-sub { font-size: 11px; color: var(--text2); }
+
+    .admin-body { display: flex; flex: 1; overflow: hidden; }
+    .admin-queue-col {
+      width: 350px; min-width: 350px; border-right: 1px solid var(--border);
+      background: var(--bg2); display: flex; flex-direction: column; overflow: hidden;
+    }
+    .admin-detail-col {
+      flex: 1; display: flex; flex-direction: column; overflow-y: auto;
+      background: var(--bg); padding: 24px;
+    }
+    .flagged-item {
+      padding: 12px 14px; margin-bottom: 6px; border-radius: var(--radius-sm);
+      background: var(--surface); border: 1px solid var(--border);
+      cursor: pointer; transition: all 0.15s; position: relative;
+    }
+    .flagged-item:hover { background: var(--surface2); border-color: rgba(255,255,255,0.15); transform: translateX(2px); }
+    .flagged-item.active { background: rgba(91,110,245,0.12); border-color: var(--accent); }
+    .flagged-item::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; border-radius: 3px 0 0 3px; }
+    .flagged-item.RISK::before { background: var(--risk); }
+    .flagged-item.FAIL::before { background: var(--fail); }
+    .flagged-item.FAILED::before { background: var(--fail); }
+    .flagged-item.APPROVED::before { background: var(--pass); }
+    .flagged-item.REJECTED::before { background: var(--fail); }
+
+    .why-flagged-banner {
+      background: linear-gradient(135deg, rgba(239,68,68,0.08), rgba(245,158,11,0.08));
+      border: 1px solid rgba(239,68,68,0.25);
+      border-radius: var(--radius);
+      padding: 16px 20px; margin-bottom: 20px;
+    }
+    .decision-box {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 20px; margin-top: 24px;
+    }
+    .dec-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .dec-badge.PENDING { background: rgba(245,158,11,0.15); color: var(--risk); border: 1px solid rgba(245,158,11,0.3); }
+    .dec-badge.APPROVED { background: rgba(16,185,129,0.15); color: var(--pass); border: 1px solid rgba(16,185,129,0.3); }
+    .dec-badge.REJECTED { background: rgba(239,68,68,0.15); color: var(--fail); border: 1px solid rgba(239,68,68,0.3); }
+    .dec-badge.AMENDMENT_REQUESTED { background: rgba(91,110,245,0.15); color: var(--accent); border: 1px solid rgba(91,110,245,0.3); }
   </style>
 </head>
 <body>
@@ -410,8 +508,14 @@
         <div class="topbar-sub" id="panel-sub">Upload one or more contract documents to begin</div>
       </div>
       <div class="topbar-actions">
-        <button class="btn btn-ghost" onclick="showMonitoring()">📊 Monitoring & Logs</button>
+        <button class="btn btn-ghost" onclick="showLogs()">📋 Logs</button>
         <button class="btn btn-ghost" onclick="showUpload()">+ New Run</button>
+        <div style="width:1px;height:20px;background:var(--border);margin:0 4px"></div>
+        <div id="user-profile-badge" style="display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;background:var(--surface2);border:1px solid var(--border);font-size:12px">
+          <span>👤</span>
+          <span id="user-email-label" style="color:var(--text2);font-size:11px;font-weight:500">user@compliance.ai</span>
+        </div>
+        <button class="btn btn-ghost" style="color:var(--fail);border-color:rgba(239,68,68,0.25);font-size:11px;padding:6px 12px" onclick="logoutDemo()">🚪 Log Out</button>
       </div>
     </div>
 
@@ -489,62 +593,219 @@
       <!-- Result Panel -->
       <div id="result-panel"></div>
 
-      <!-- Monitoring & Logs Panel -->
+      <!-- User-Friendly Activity & Logs Panel -->
       <div id="monitoring-panel" style="display:none;max-width:1200px">
         <div class="kpi-row" id="mon-kpis">
           <div class="kpi-card">
-            <div class="kpi-label">Active Telemetry</div>
-            <div class="kpi-value" style="font-size:18px;color:var(--pass)">OpenTelemetry</div>
-            <div class="kpi-sub">Azure Monitor Tracing: Ready</div>
+            <div class="kpi-label">Total Activities</div>
+            <div class="kpi-value" id="mon-log-count">0</div>
+            <div class="kpi-sub" id="mon-log-sub">Events recorded</div>
           </div>
           <div class="kpi-card">
-            <div class="kpi-label">Log File Target</div>
-            <div class="kpi-value" style="font-size:16px">application.jsonl</div>
-            <div class="kpi-sub">Location: logs/application.jsonl</div>
+            <div class="kpi-label">System Health</div>
+            <div class="kpi-value" style="font-size:18px;color:var(--pass)">🟢 Operational</div>
+            <div class="kpi-sub">All AI Agents Online</div>
           </div>
           <div class="kpi-card">
             <div class="kpi-label">Total Workflows</div>
-            <div class="kpi-value" id="mon-total-runs">—</div>
-            <div class="kpi-sub" id="mon-pass-rate">—</div>
+            <div class="kpi-value" id="mon-total-runs">0</div>
+            <div class="kpi-sub" id="mon-pass-rate">Ready for analysis</div>
           </div>
           <div class="kpi-card">
-            <div class="kpi-label">Log Records Loaded</div>
-            <div class="kpi-value" id="mon-log-count">0</div>
-            <div class="kpi-sub">Structured Events</div>
+            <div class="kpi-label">Issues & Warnings</div>
+            <div class="kpi-value" id="mon-issue-count" style="font-size:18px;color:var(--pass)">0</div>
+            <div class="kpi-sub" id="mon-issue-sub">No errors detected</div>
           </div>
         </div>
 
         <div class="card">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px">
-            <div class="card-title" style="margin-bottom:0">📋 Structured Live Application Logs</div>
-            <div style="display:flex;gap:8px;align-items:center">
-              <input id="log-search" type="text" placeholder="Search logs (stage, run_id, error)..." 
-                style="padding:6px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:12px;width:250px"
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px">
+            <div>
+              <div class="card-title" style="margin-bottom:2px;display:flex;align-items:center;gap:8px">
+                <span>📋 Live Activity & Audit Trail</span>
+                <span id="log-count-badge" style="font-size:11px;padding:2px 8px;border-radius:10px;background:var(--surface2);color:var(--text2)">0 entries</span>
+              </div>
+              <div style="font-size:12px;color:var(--text3)">Clear, plain-English record of every contract analysis step and system operation</div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <input id="log-search" type="text" placeholder="Search activities, stages, documents..." 
+                style="padding:7px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:12px;width:240px;outline:none"
                 oninput="renderLogsTable()" />
-              <select id="log-level-filter" class="form-select" style="width:110px;padding:6px 10px;font-size:12px" onchange="renderLogsTable()">
-                <option value="ALL">All Levels</option>
-                <option value="INFO">INFO</option>
-                <option value="WARNING">WARNING</option>
-                <option value="ERROR">ERROR</option>
+              <select id="log-level-filter" class="form-select" style="width:135px;padding:7px 10px;font-size:12px" onchange="renderLogsTable()">
+                <option value="ALL">All Activities</option>
+                <option value="INFO">🟢 Normal Activity</option>
+                <option value="WARNING">🟡 Warnings</option>
+                <option value="ERROR">🔴 Errors Only</option>
               </select>
-              <button class="btn btn-ghost" style="padding:6px 12px;font-size:12px" onclick="loadMonitoringLogs()">↺ Refresh</button>
+              <button class="btn btn-ghost" style="padding:7px 12px;font-size:12px" onclick="loadLogs()">↺ Refresh</button>
+              <button class="btn btn-ghost" style="padding:7px 12px;font-size:12px;color:var(--fail);border-color:rgba(239,68,68,0.25)" onclick="clearAllLogs()">🗑️ Clear Logs</button>
             </div>
           </div>
-          <div class="table-wrap" style="max-height:480px;overflow-y:auto">
+
+          <div class="table-wrap" style="max-height:500px;overflow-y:auto">
             <table>
               <thead>
                 <tr>
-                  <th>Timestamp</th><th>Level</th><th>Stage</th><th>Event / Message</th><th>Run ID</th><th>Duration</th>
+                  <th style="width:105px">Time</th>
+                  <th style="width:100px">Status</th>
+                  <th style="width:190px">Step / Action</th>
+                  <th>Activity Description</th>
+                  <th style="width:125px">Document / Run</th>
+                  <th style="width:85px;text-align:right">Duration</th>
                 </tr>
               </thead>
               <tbody id="logs-tbody">
-                <tr><td colspan="6" style="text-align:center;color:var(--text3);padding:20px">Loading logs...</td></tr>
+                <tr><td colspan="6" style="text-align:center;color:var(--text3);padding:20px">Loading activity stream...</td></tr>
               </tbody>
             </table>
           </div>
         </div>
       </div>
 
+    </div>
+  </div>
+</div>
+
+<!-- Demo Auth Modal -->
+<div id="auth-modal" style="display:none;">
+  <div class="auth-card">
+    <div style="text-align:center;">
+      <div style="display:inline-flex;align-items:center;gap:10px;margin-bottom:8px">
+        <div class="logo-icon" style="width:36px;height:36px;font-size:18px">⚖️</div>
+        <div style="font-size:18px;font-weight:700">Compliance AI</div>
+      </div>
+      <div style="font-size:12px;color:var(--text2)">Contract Compliance & Intelligence Platform</div>
+    </div>
+
+    <!-- Role Selection -->
+    <div>
+      <label class="form-label" style="margin-bottom:8px;font-size:11px;text-transform:uppercase;letter-spacing:0.5px">Select Role</label>
+      <div class="role-toggle-group">
+        <div class="role-btn active" id="role-user-btn" onclick="selectDemoRole('user')">
+          <div style="font-size:22px;margin-bottom:4px">👤</div>
+          <div><strong>User</strong></div>
+          <div style="font-size:10px;color:var(--text3);margin-top:2px">Full Compliance App</div>
+        </div>
+        <div class="role-btn" id="role-admin-btn" onclick="selectDemoRole('admin')">
+          <div style="font-size:22px;margin-bottom:4px">🛡️</div>
+          <div><strong>Admin</strong></div>
+          <div style="font-size:10px;color:var(--text3);margin-top:2px">Admin Portal</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Credentials Form -->
+    <form id="auth-form" onsubmit="handleDemoLogin(event)" style="display:flex;flex-direction:column;gap:14px">
+      <div class="form-group">
+        <label class="form-label" style="font-size:11px">Email Address</label>
+        <input type="email" id="auth-email" class="form-input" required value="user@compliance.ai" style="padding:9px 12px;font-size:13px;width:100%" />
+      </div>
+      <div class="form-group">
+        <label class="form-label" style="font-size:11px">Password</label>
+        <input type="password" id="auth-pass" class="form-input" required value="password123" style="padding:9px 12px;font-size:13px;width:100%" />
+      </div>
+      <button type="submit" class="btn btn-primary" id="auth-submit-btn" style="padding:11px;justify-content:center;font-size:13px;margin-top:4px">
+        Sign In as User
+      </button>
+    </form>
+
+    <div style="display:flex;align-items:center;gap:8px;justify-content:center;font-size:11px;color:var(--text3);border-top:1px solid var(--border);padding-top:14px">
+      <span>Demo Authentication</span> · <span>Instant 1-Click Role Switch</span>
+    </div>
+  </div>
+</div>
+
+<!-- Admin Decision Desk & Review Portal -->
+<div id="admin-app" style="display:none;">
+  <!-- Admin Top Navigation -->
+  <div class="admin-topbar">
+    <div style="display:flex;align-items:center;gap:12px">
+      <div class="logo-icon" style="width:34px;height:34px;font-size:16px">⚖️</div>
+      <div>
+        <span style="font-weight:700;font-size:15px">Compliance AI</span>
+        <span style="font-size:10px;color:var(--accent);margin-left:8px;font-weight:700;padding:3px 8px;border-radius:10px;background:rgba(91,110,245,0.15);border:1px solid rgba(91,110,245,0.3);text-transform:uppercase;letter-spacing:0.5px">Executive Decision Desk</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;margin-left:14px;padding:3px 10px;border-radius:12px;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.25);font-size:11px;color:var(--pass)">
+        <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--pass);animation:pulse-bubble 1.5s infinite"></span>
+        <span>Real-Time Sync Active</span>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <a href="/monitor" target="_blank" class="btn btn-ghost" style="padding:6px 12px;font-size:12px;display:inline-flex;align-items:center;gap:6px;text-decoration:none">
+        <span>📡</span>
+        <span>Monitor</span>
+      </a>
+      <button class="btn btn-ghost" style="padding:6px 12px;font-size:12px" onclick="loadAdminFlaggedRuns(true)">↺ Refresh Queue</button>
+      <div style="display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;background:var(--surface2);border:1px solid var(--border);font-size:12px">
+        <span>🛡️</span>
+        <span style="color:var(--text2);font-size:11px;font-weight:500">admin@compliance.ai</span>
+      </div>
+      <button class="btn btn-ghost" style="color:var(--fail);border-color:rgba(239,68,68,0.25);font-size:11px;padding:6px 12px" onclick="logoutDemo()">🚪 Log Out</button>
+    </div>
+  </div>
+
+  <!-- Admin KPIs -->
+  <div class="admin-kpis">
+    <div class="admin-kpi-card">
+      <div class="admin-kpi-lbl">Flagged Requiring Review</div>
+      <div class="admin-kpi-val" style="color:var(--risk)" id="adm-kpi-flagged">0</div>
+      <div class="admin-kpi-sub">Non-compliant or at-risk contracts</div>
+    </div>
+    <div class="admin-kpi-card">
+      <div class="admin-kpi-lbl">Pending Admin Action</div>
+      <div class="admin-kpi-val" style="color:var(--accent)" id="adm-kpi-pending">0</div>
+      <div class="admin-kpi-sub">Awaiting approval or rejection</div>
+    </div>
+    <div class="admin-kpi-card">
+      <div class="admin-kpi-lbl">Approved Exceptions</div>
+      <div class="admin-kpi-val" style="color:var(--pass)" id="adm-kpi-approved">0</div>
+      <div class="admin-kpi-sub">Signed off by Compliance Officer</div>
+    </div>
+    <div class="admin-kpi-card">
+      <div class="admin-kpi-lbl">Rejected / Amendments</div>
+      <div class="admin-kpi-val" style="color:var(--fail)" id="adm-kpi-rejected">0</div>
+      <div class="admin-kpi-sub">Sent back for clause revisions</div>
+    </div>
+  </div>
+
+  <!-- Admin Master Detail Body -->
+  <div class="admin-body">
+    <!-- Left Column: Flagged Queue -->
+    <div class="admin-queue-col">
+      <div style="padding:14px 16px 10px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+        <span style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.8px">Flagged Contracts Queue</span>
+        <span id="adm-queue-badge" style="font-size:10px;padding:2px 7px;border-radius:10px;background:rgba(245,158,11,0.15);color:var(--risk);font-weight:700">0 Items</span>
+      </div>
+      <div style="padding:10px 12px">
+        <input id="adm-search" type="text" placeholder="Search flagged contracts..." 
+          style="width:100%;padding:7px 12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:12px;outline:none"
+          oninput="filterAdminQueue()" />
+      </div>
+      <div style="display:flex;gap:4px;padding:0 12px 10px;overflow-x:auto">
+        <button class="btn btn-ghost" id="adm-tab-all" style="padding:4px 8px;font-size:11px;font-weight:600" onclick="setAdminFilter('ALL')">All</button>
+        <button class="btn btn-ghost" id="adm-tab-pending" style="padding:4px 8px;font-size:11px;font-weight:600" onclick="setAdminFilter('PENDING')">⏳ Pending</button>
+        <button class="btn btn-ghost" id="adm-tab-risk" style="padding:4px 8px;font-size:11px;font-weight:600" onclick="setAdminFilter('RISK')">⚠️ Risk</button>
+        <button class="btn btn-ghost" id="adm-tab-fail" style="padding:4px 8px;font-size:11px;font-weight:600" onclick="setAdminFilter('FAIL')">❌ Fail</button>
+        <button class="btn btn-ghost" id="adm-tab-decided" style="padding:4px 8px;font-size:11px;font-weight:600" onclick="setAdminFilter('DECIDED')">✅ Decided</button>
+      </div>
+      <div id="admin-flagged-list" style="flex:1;overflow-y:auto;padding:0 12px 12px">
+        <div style="text-align:center;padding:40px 10px;color:var(--text3)">
+          <div style="font-size:24px;margin-bottom:8px">⏳</div>
+          <div style="font-size:12px">Loading flagged contracts...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Detail & Decision Desk -->
+    <div class="admin-detail-col" id="admin-detail-col">
+      <div id="admin-empty-selection" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;text-align:center;padding:40px">
+        <div style="font-size:48px;margin-bottom:16px">🛡️</div>
+        <h3 style="font-size:18px;font-weight:700;color:var(--text);margin-bottom:8px">Executive Compliance Desk</h3>
+        <p style="color:var(--text2);font-size:13px;max-width:460px;line-height:1.6;margin-bottom:20px">
+          Whenever a user uploads a contract that results in <strong>Risk</strong> or <strong>Fail</strong>, it appears in your live queue on the left. Select any contract to inspect clause violations, view visual highlight evidence, and make an approval/rejection decision.
+        </p>
+      </div>
+      <div id="admin-selected-workspace" style="display:none"></div>
     </div>
   </div>
 </div>
@@ -572,8 +833,788 @@ const STAGES = [
   { key: 'evidence_generation',  label: 'Evidence',             icon: '📸' },
 ];
 
+// ─── Demo Authentication ──────────────────────────────────────────────────────
+let currentRole = 'user';
+let currentUser = null;
+
+function initDemoAuth() {
+  const saved = localStorage.getItem('compliance_demo_user');
+  if (saved) {
+    try {
+      currentUser = JSON.parse(saved);
+      applyUserSession(currentUser);
+      return;
+    } catch (e) {}
+  }
+  // Default to showing auth modal with User preset
+  showAuthModal();
+}
+
+function selectDemoRole(role) {
+  currentRole = role;
+  const userBtn = document.getElementById('role-user-btn');
+  const adminBtn = document.getElementById('role-admin-btn');
+  const emailInput = document.getElementById('auth-email');
+  const passInput = document.getElementById('auth-pass');
+  const submitBtn = document.getElementById('auth-submit-btn');
+
+  if (role === 'user') {
+    if (userBtn) userBtn.classList.add('active');
+    if (adminBtn) adminBtn.classList.remove('active');
+    if (emailInput) emailInput.value = 'user@compliance.ai';
+    if (passInput) passInput.value = 'password123';
+    if (submitBtn) submitBtn.textContent = 'Sign In as User';
+  } else {
+    if (adminBtn) adminBtn.classList.add('active');
+    if (userBtn) userBtn.classList.remove('active');
+    if (emailInput) emailInput.value = 'admin@compliance.ai';
+    if (passInput) passInput.value = 'admin123';
+    if (submitBtn) submitBtn.textContent = 'Sign In as Admin';
+  }
+}
+
+function handleDemoLogin(e) {
+  if (e) e.preventDefault();
+  const email = document.getElementById('auth-email')?.value || (currentRole === 'admin' ? 'admin@compliance.ai' : 'user@compliance.ai');
+  currentUser = { role: currentRole, email: email };
+  localStorage.setItem('compliance_demo_user', JSON.stringify(currentUser));
+  applyUserSession(currentUser);
+  toast(`Signed in as ${currentRole === 'admin' ? 'Admin' : 'User'}`);
+}
+
+function applyUserSession(user) {
+  const authModal = document.getElementById('auth-modal');
+  const userApp = document.getElementById('app');
+  const adminApp = document.getElementById('admin-app');
+
+  if (!user) {
+    stopAdminPolling();
+    stopUserPolling();
+    showAuthModal();
+    return;
+  }
+
+  if (authModal) authModal.style.display = 'none';
+
+  if (user.role === 'admin') {
+    stopUserPolling();
+    if (userApp) userApp.style.display = 'none';
+    if (adminApp) adminApp.style.display = 'flex';
+    startAdminPolling();
+  } else {
+    stopAdminPolling();
+    if (adminApp) adminApp.style.display = 'none';
+    if (userApp) userApp.style.display = 'flex';
+    const emailLabel = document.getElementById('user-email-label');
+    if (emailLabel) emailLabel.textContent = user.email || 'user@compliance.ai';
+    startUserPolling();
+  }
+}
+
+function showAuthModal() {
+  stopAdminPolling();
+  stopUserPolling();
+  const authModal = document.getElementById('auth-modal');
+  const userApp = document.getElementById('app');
+  const adminApp = document.getElementById('admin-app');
+  if (authModal) authModal.style.display = 'flex';
+  if (userApp) userApp.style.display = 'none';
+  if (adminApp) adminApp.style.display = 'none';
+  selectDemoRole('user');
+}
+
+function logoutDemo() {
+  stopAdminPolling();
+  stopUserPolling();
+  localStorage.removeItem('compliance_demo_user');
+  currentUser = null;
+  showAuthModal();
+  toast('Signed out');
+}
+
+// ─── User Real-Time Auto Sync ────────────────────────────────────────────────
+let userPollTimer = null;
+let currentProgressRunId = null;
+
+function startUserPolling() {
+  stopUserPolling();
+  userPollTimer = setInterval(async () => {
+    // 1. Auto-refresh sidebar run history & stats
+    try {
+      const res = await fetch('/api/runs');
+      if (res.ok) {
+        allRuns = await res.json();
+        const activeRunId = document.querySelector('.hist-item.active')?.dataset?.runId;
+        renderHistory(allRuns);
+        if (activeRunId) {
+          document.querySelectorAll('.hist-item').forEach(el => {
+            if (el.dataset.runId === activeRunId) el.classList.add('active');
+          });
+        }
+      }
+      await loadStats();
+
+      // 2. If user is waiting on progress panel, check if run has finished
+      const progPanel = document.getElementById('progress-panel');
+      if (progPanel && progPanel.style.display !== 'none' && currentProgressRunId) {
+        const runRes = await fetch(`/api/runs/${currentProgressRunId}`);
+        if (runRes.ok) {
+          const freshRun = await runRes.json();
+          if (freshRun.processing_status && !['PROCESSING', 'PENDING'].includes(freshRun.processing_status)) {
+            showResult(freshRun);
+            document.querySelectorAll('.hist-item').forEach(el => {
+              if (el.dataset.runId === freshRun.run_id) el.classList.add('active');
+            });
+          }
+        }
+      }
+
+      // 3. If user is currently looking at a contract result, check if admin approved or updated it
+      const activeItem = document.querySelector('.hist-item.active');
+      const resultPanel = document.getElementById('result-panel');
+      if (activeItem && resultPanel && resultPanel.style.display !== 'none') {
+        const curRunId = activeItem.dataset.runId;
+        if (curRunId) {
+          const runRes = await fetch(`/api/runs/${curRunId}`);
+          if (runRes.ok) {
+            const freshRun = await runRes.json();
+            const currentDec = resultPanel.dataset.lastAdminDecision || '';
+            const newDec = freshRun.admin_decision || '';
+            const currentStatus = resultPanel.dataset.lastStatus || '';
+            const newStatus = freshRun.overall_status || '';
+            if (currentDec !== newDec || currentStatus !== newStatus) {
+              resultPanel.dataset.lastAdminDecision = newDec;
+              resultPanel.dataset.lastStatus = newStatus;
+              showResult(freshRun);
+            }
+          }
+        }
+      }
+    } catch (err) {
+      console.debug('User auto-sync tick error:', err);
+    }
+  }, 3000);
+}
+
+function stopUserPolling() {
+  if (userPollTimer) {
+    clearInterval(userPollTimer);
+    userPollTimer = null;
+  }
+}
+
+// ─── Admin Decision Desk Logic ────────────────────────────────────────────────
+let adminFlaggedRuns = [];
+let adminSelectedRunId = null;
+let adminFilter = 'ALL';
+let adminPollTimer = null;
+let adminActiveTab = 'violations';
+
+function startAdminPolling() {
+  stopAdminPolling();
+  loadAdminFlaggedRuns(false);
+  adminPollTimer = setInterval(() => loadAdminFlaggedRuns(false), 3500);
+}
+
+function stopAdminPolling() {
+  if (adminPollTimer) {
+    clearInterval(adminPollTimer);
+    adminPollTimer = null;
+  }
+}
+
+async function loadAdminFlaggedRuns(manual = false) {
+  try {
+    const [runsRes, statsRes] = await Promise.all([
+      fetch('/api/admin/flagged-runs'),
+      fetch('/api/admin/stats')
+    ]);
+    const runsData = await runsRes.json();
+    const statsData = await statsRes.json();
+
+    adminFlaggedRuns = runsData.flagged_runs || [];
+
+    // Update KPI counters
+    const flaggedEl = document.getElementById('adm-kpi-flagged');
+    if (flaggedEl) flaggedEl.textContent = statsData.flagged_total ?? adminFlaggedRuns.length;
+
+    const pendingEl = document.getElementById('adm-kpi-pending');
+    if (pendingEl) pendingEl.textContent = statsData.pending_review ?? 0;
+
+    const approvedEl = document.getElementById('adm-kpi-approved');
+    if (approvedEl) approvedEl.textContent = statsData.approved ?? 0;
+
+    const rejectedEl = document.getElementById('adm-kpi-rejected');
+    if (rejectedEl) rejectedEl.textContent = (statsData.rejected || 0) + (statsData.amendment_requested || 0);
+
+    const badgeEl = document.getElementById('adm-queue-badge');
+    if (badgeEl) badgeEl.textContent = `${adminFlaggedRuns.length} Items`;
+
+    renderAdminQueue();
+
+    // Only auto-load first item if no run has been selected yet
+    if (!adminSelectedRunId && adminFlaggedRuns.length > 0) {
+      selectAdminRun(adminFlaggedRuns[0].run_id);
+    }
+
+    if (manual) toast('Queue refreshed');
+  } catch (err) {
+    console.error('Failed to load admin flagged queue:', err);
+  }
+}
+
+function setAdminFilter(filter) {
+  adminFilter = filter;
+  ['all', 'pending', 'risk', 'fail', 'decided'].forEach(t => {
+    const btn = document.getElementById(`adm-tab-${t}`);
+    if (btn) btn.classList.toggle('active', t.toUpperCase() === filter);
+  });
+  renderAdminQueue();
+}
+
+function filterAdminQueue() {
+  renderAdminQueue();
+}
+
+function renderAdminQueue() {
+  const list = document.getElementById('admin-flagged-list');
+  if (!list) return;
+
+  const search = (document.getElementById('adm-search')?.value || '').toLowerCase();
+
+  const filtered = adminFlaggedRuns.filter(r => {
+    const status = (r.overall_status || r.processing_status || '').toUpperCase();
+    const decision = (r.admin_decision || 'PENDING').toUpperCase();
+
+    if (adminFilter === 'PENDING' && (decision !== 'PENDING' && decision !== '')) return false;
+    if (adminFilter === 'RISK' && status !== 'RISK') return false;
+    if (adminFilter === 'FAIL' && status !== 'FAIL' && status !== 'FAILED') return false;
+    if (adminFilter === 'DECIDED' && (decision === 'PENDING' || decision === '')) return false;
+
+    if (search) {
+      const line = `${r.file_name} ${r.run_id} ${status} ${decision}`.toLowerCase();
+      if (!line.includes(search)) return false;
+    }
+    return true;
+  });
+
+  if (!filtered.length) {
+    list.innerHTML = `
+      <div style="text-align:center;padding:40px 10px;color:var(--text3)">
+        <div style="font-size:28px;margin-bottom:8px">📂</div>
+        <div style="font-size:12px;font-weight:600;color:var(--text2)">No Flagged Contracts</div>
+        <div style="font-size:11px;margin-top:4px">${adminFlaggedRuns.length === 0 ? 'All contracts are fully compliant (PASS).' : 'No items match your filter.'}</div>
+      </div>
+    `;
+    return;
+  }
+
+  list.innerHTML = filtered.map(r => {
+    const dec = r.admin_decision || 'PENDING';
+    const isApproved = dec === 'APPROVED' || r.overall_status === 'APPROVED';
+    const isRejected = dec === 'REJECTED' || r.overall_status === 'REJECTED';
+    const status = isApproved ? 'APPROVED' : (isRejected ? 'REJECTED' : (r.overall_status || (r.processing_status === 'FAILED' ? 'FAIL' : 'RISK')));
+    const statusCls = status;
+    const active = r.run_id === adminSelectedRunId ? 'active' : '';
+    const score = r.risk_score != null ? `${r.risk_score}/100` : '—';
+    const decLabel = dec === 'APPROVED' ? '✅ Approved' : (dec === 'REJECTED' ? '❌ Rejected' : (dec === 'AMENDMENT_REQUESTED' ? '📝 Amendment' : '⏳ Needs Action'));
+    const decCls = dec;
+    const timeStr = r.created_at ? new Date(r.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+    const badgeSevCls = status === 'APPROVED' ? 'LOW' : (status === 'FAIL' || status === 'FAILED' || status === 'REJECTED' ? 'CRITICAL' : 'HIGH');
+
+    return `
+      <div class="flagged-item ${statusCls} ${active}" onclick="selectAdminRun('${r.run_id}')" id="adm-item-${r.run_id}">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+          <span class="sev-badge ${badgeSevCls}" style="font-size:10px">${status}</span>
+          <span class="dec-badge ${decCls}" style="font-size:9px;padding:2px 7px">${decLabel}</span>
+        </div>
+        <div style="font-size:12px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px" title="${r.file_name}">
+          ${r.file_name}
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--text3)">
+          <span>Risk: <strong style="color:${status === 'APPROVED' ? 'var(--pass)' : (status === 'FAIL' ? 'var(--fail)' : 'var(--risk)')}">${score}</strong></span>
+          <span>${r.findings_count || 0} findings · ${timeStr}</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+async function selectAdminRun(runId) {
+  adminSelectedRunId = runId;
+  document.querySelectorAll('.flagged-item').forEach(el => el.classList.remove('active'));
+  const activeItem = document.getElementById(`adm-item-${runId}`);
+  if (activeItem) activeItem.classList.add('active');
+
+  const emptyView = document.getElementById('admin-empty-selection');
+  const workspace = document.getElementById('admin-selected-workspace');
+  if (emptyView) emptyView.style.display = 'none';
+  if (workspace) {
+    workspace.style.display = 'block';
+    workspace.innerHTML = `
+      <div style="text-align:center;padding:60px;color:var(--text3)">
+        <div style="font-size:32px;margin-bottom:12px">⏳</div>
+        <div style="font-size:14px;color:var(--text)">Loading full contract decision workspace...</div>
+      </div>
+    `;
+  }
+
+  await loadAdminRunDetail(runId, false);
+}
+
+async function loadAdminRunDetail(runId, silent = false) {
+  const workspace = document.getElementById('admin-selected-workspace');
+  if (!workspace || (!silent && adminSelectedRunId !== runId)) return;
+
+  try {
+    const [runRes, riskRes] = await Promise.all([
+      fetch(`/api/runs/${runId}`),
+      fetch(`/api/runs/${runId}/risk-breakdown`)
+    ]);
+    const run = await runRes.json();
+    const risk = await riskRes.json();
+
+    renderAdminDetailWorkspace(run, risk);
+  } catch (err) {
+    if (!silent) {
+      workspace.innerHTML = `
+        <div class="card" style="text-align:center;padding:40px;color:var(--fail)">
+          <div style="font-size:32px;margin-bottom:10px">⚠️</div>
+          <div>Failed to load contract decision data: ${err.message}</div>
+        </div>
+      `;
+    }
+  }
+}
+
+function renderAdminDetailWorkspace(run, risk) {
+  const workspace = document.getElementById('admin-selected-workspace');
+  if (!workspace) return;
+
+  const dec = run.admin_decision || 'PENDING';
+  const isApproved = (dec === 'APPROVED') || (run.overall_status === 'APPROVED');
+  const isRejected = (dec === 'REJECTED') || (run.overall_status === 'REJECTED');
+  const status = isApproved ? 'APPROVED' : (isRejected ? 'REJECTED' : (run.overall_status || 'FAIL'));
+  const statusColor = isApproved ? 'var(--pass)' : (isRejected || status === 'FAIL' ? 'var(--fail)' : 'var(--risk)');
+  const riskScore = run.risk_score ?? 0;
+  const draftNotes = document.getElementById('adm-decision-notes')?.value;
+  const notes = (draftNotes !== undefined && draftNotes !== '') ? draftNotes : (run.admin_notes || '');
+  const reviewer = run.admin_reviewer || 'admin@compliance.ai';
+  const decidedAt = run.admin_decided_at ? new Date(run.admin_decided_at).toLocaleString() : '';
+
+  // Calculate top reasons why it was claimed as risky/failed
+  const findings = run.findings || [];
+  const criticalFindings = findings.filter(f => f.severity === 'CRITICAL' || f.severity === 'HIGH');
+  const violations = findings.filter(f => f.status === 'NON_COMPLIANT' || f.status === 'VIOLATION' || f.status === 'PARTIALLY_COMPLIANT');
+
+  let whySummary = '';
+  if (run.processing_status === 'FAILED') {
+    whySummary = `Processing error occurred: ${run.error_message || 'Workflow execution halted due to document extraction failure.'}`;
+  } else {
+    whySummary = `This contract received an initial scan evaluation with a risk penalty of <strong>${riskScore}/100</strong> and <strong>${violations.length} policy violations</strong> (${criticalFindings.length} High/Critical severity). Key issues include missing standard protective clauses and unbounded liability.`;
+  }
+
+  const curTab = adminActiveTab || 'violations';
+  const fileSizeStr = run.file_size ? `${(run.file_size / 1024).toFixed(1)} KB` : 'Original Upload';
+
+  workspace.innerHTML = `
+    <!-- Top Header -->
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px;flex-wrap:wrap;gap:14px">
+      <div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+          <h2 style="font-size:18px;font-weight:700;color:var(--text);margin:0">${run.file_name}</h2>
+          <span class="status-badge-lg ${status}" style="font-size:11px;padding:4px 12px;font-weight:800;letter-spacing:0.5px">
+            ${isApproved ? '✅ APPROVED' : (isRejected ? '❌ REJECTED' : status)}
+          </span>
+          <span class="dec-badge ${dec}">${dec.replace('_', ' ')}</span>
+        </div>
+        <div style="font-size:12px;color:var(--text2)">
+          Uploaded by <strong style="color:var(--text)">user@compliance.ai</strong> · Run ID: <span style="font-family:var(--mono);color:var(--accent)">${run.run_id}</span> · Analyzed ${new Date(run.created_at).toLocaleString()}
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <a href="/api/runs/${run.run_id}/document" download="${run.file_name}" class="btn btn-primary" style="padding:7px 14px;font-size:12px;display:inline-flex;align-items:center;gap:6px">
+          📥 Download Original File
+        </a>
+        <a href="/api/runs/${run.run_id}/document" target="_blank" class="btn btn-ghost" style="padding:7px 12px;font-size:12px;display:inline-flex;align-items:center;gap:6px">
+          🔍 Open File
+        </a>
+        <a href="/api/runs/${run.run_id}/report" download class="btn btn-ghost" style="padding:7px 12px;font-size:12px">
+          ⬇ Audit Report (.md)
+        </a>
+      </div>
+    </div>
+
+    ${isApproved ? `
+      <!-- Admin Approval Details Callout -->
+      <div style="background:linear-gradient(135deg, rgba(16,185,129,0.14), rgba(5,150,105,0.06));border:1px solid rgba(16,185,129,0.4);border-radius:var(--radius);padding:16px 20px;margin-bottom:18px;box-shadow:0 0 16px rgba(16,185,129,0.1)">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:8px">
+          <div style="display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px;color:var(--pass)">
+            <span style="font-size:18px">✅</span>
+            <span>Contract Approved by Executive Compliance Officer</span>
+          </div>
+          <span class="dec-badge APPROVED" style="font-size:11px;padding:3px 10px">✅ APPROVED</span>
+        </div>
+        <div style="font-size:13px;color:var(--text);line-height:1.5;margin-bottom:6px">
+          <strong style="color:var(--pass)">Reason for Approval:</strong> ${run.admin_notes ? run.admin_notes : 'Approved with executive compliance exception based on commercial assessment.'}
+        </div>
+        <div style="font-size:11px;color:var(--text3)">
+          Signed off by <strong style="color:var(--text2)">${reviewer}</strong> ${decidedAt ? 'on ' + decidedAt : ''}
+        </div>
+      </div>
+    ` : (isRejected ? `
+      <!-- Admin Rejection Details Callout -->
+      <div style="background:linear-gradient(135deg, rgba(239,68,68,0.14), rgba(220,38,38,0.06));border:1px solid rgba(239,68,68,0.4);border-radius:var(--radius);padding:16px 20px;margin-bottom:18px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:8px">
+          <div style="display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px;color:var(--fail)">
+            <span style="font-size:18px">❌</span>
+            <span>Contract Rejected by Executive Compliance Officer</span>
+          </div>
+          <span class="dec-badge REJECTED" style="font-size:11px;padding:3px 10px">❌ REJECTED</span>
+        </div>
+        <div style="font-size:13px;color:var(--text);line-height:1.5;margin-bottom:6px">
+          <strong style="color:var(--fail)">Reason for Rejection:</strong> ${run.admin_notes ? run.admin_notes : 'Compliance risks exceed acceptable corporate thresholds.'}
+        </div>
+        <div style="font-size:11px;color:var(--text3)">
+          Decided by <strong style="color:var(--text2)">${reviewer}</strong> ${decidedAt ? 'on ' + decidedAt : ''}
+        </div>
+      </div>
+    ` : '')}
+
+    <!-- Attached Document Banner Card -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 18px;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="font-size:24px">📄</div>
+        <div>
+          <div style="font-size:13px;font-weight:700;color:var(--text)">Attached User Document: ${run.file_name}</div>
+          <div style="font-size:11px;color:var(--text2)">
+            ${run.document_type || 'Contract Document'} · File Size: ${fileSizeStr} · Exact file uploaded by user
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <a href="/api/runs/${run.run_id}/document" download="${run.file_name}" class="btn btn-ghost" style="padding:5px 12px;font-size:11px">
+          📥 Download File
+        </a>
+      </div>
+    </div>
+
+    <!-- Why Claimed as Risky / Failed Callout Banner -->
+    <div class="why-flagged-banner">
+      <div style="display:flex;align-items:center;gap:8px;font-weight:700;font-size:13px;color:var(--risk);margin-bottom:6px">
+        <span>⚠️</span>
+        <span>Original Automated Analysis Findings</span>
+      </div>
+      <div style="font-size:12.5px;line-height:1.5;color:var(--text)">
+        ${whySummary}
+      </div>
+    </div>
+
+    <!-- Quick Stat Cards -->
+    <div class="kpi-row" style="margin-bottom:20px">
+      <div class="kpi-card">
+        <div class="kpi-label">Risk Score</div>
+        <div class="kpi-value" style="color:${statusColor}">${riskScore} <span style="font-size:12px;color:var(--text3)">/ 100</span></div>
+        <div class="kpi-sub">${run.risk_level || 'HIGH'} Risk Level</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Document Type</div>
+        <div class="kpi-value" style="font-size:16px">${run.document_type || 'Contract'}</div>
+        <div class="kpi-sub">Confidence: ${run.confidence ? (run.confidence*100).toFixed(0)+'%' : '—'}</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Extracted Obligations</div>
+        <div class="kpi-value">${run.obligation_count ?? 0}</div>
+        <div class="kpi-sub">${findings.length} Policy Findings</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Critical Violations</div>
+        <div class="kpi-value" style="color:var(--fail)">${criticalFindings.length}</div>
+        <div class="kpi-sub">Mandatory Breaches</div>
+      </div>
+    </div>
+
+    <!-- Tabs Navigation -->
+    <div class="tabs" style="margin-bottom:16px">
+      <button class="tab ${curTab === 'violations' ? 'active' : ''}" id="adm-tabbtn-violations" onclick="switchAdminTab('violations')">🚨 Violations & Clause Gaps (${violations.length})</button>
+      <button class="tab ${curTab === 'evidence' ? 'active' : ''}" id="adm-tabbtn-evidence" onclick="switchAdminTab('evidence')">📸 Audit Evidence (${findings.filter(f=>f.image_path).length})</button>
+      <button class="tab ${curTab === 'recs' ? 'active' : ''}" id="adm-tabbtn-recs" onclick="switchAdminTab('recs')">💡 AI Recommendations (${(run.recommendations||[]).length})</button>
+      <button class="tab ${curTab === 'math' ? 'active' : ''}" id="adm-tabbtn-math" onclick="switchAdminTab('math')">📊 Risk Breakdown & Expected vs Actual</button>
+    </div>
+
+    <!-- Tab 1: Violations -->
+    <div id="adm-content-violations" class="tab-content ${curTab === 'violations' ? 'active' : ''}">
+      <div class="card">
+        <div class="card-title">Detailed Clause Findings & Gaps</div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:180px">Policy Rule</th>
+                <th style="width:100px">Clause Ref</th>
+                <th style="width:110px">Status</th>
+                <th style="width:90px">Severity</th>
+                <th>Finding & Evidence Excerpt</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${findings.map(f => `
+                <tr>
+                  <td>
+                    <strong style="color:var(--accent);font-size:12px">${f.policy_id}</strong>
+                    <div style="font-size:11px;color:var(--text2)">${f.policy_name || ''}</div>
+                  </td>
+                  <td style="color:var(--text2);font-family:var(--mono);font-size:11px">${f.clause_ref || '—'}</td>
+                  <td><span class="status-dot ${f.status}">${f.status}</span></td>
+                  <td><span class="sev-badge ${f.severity}">${f.severity}</span></td>
+                  <td style="font-size:12px;line-height:1.4">
+                    <div style="margin-bottom:4px;color:var(--text)">${f.finding || ''}</div>
+                    ${f.evidence ? `<div style="font-size:11px;color:var(--text3);font-style:italic;background:var(--surface);padding:4px 8px;border-radius:4px">“${f.evidence.substring(0,180)}…”</div>` : ''}
+                  </td>
+                </tr>
+              `).join('') || '<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text3)">No findings</td></tr>'}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab 2: Evidence -->
+    <div id="adm-content-evidence" class="tab-content ${curTab === 'evidence' ? 'active' : ''}">
+      <div class="evidence-grid">
+        ${findings.filter(f => f.image_path).map(f => `
+          <div class="ev-card">
+            <div class="ev-card-header">
+              <span class="ev-policy-id">${f.policy_id}</span>
+              <span class="sev-badge ${f.severity}">${f.severity}</span>
+            </div>
+            <img class="ev-card-img"
+              src="/api/evidence/${run.run_id}/${f.policy_id.replace('-','_')}"
+              alt="${f.policy_id} evidence"
+              onclick="openLightbox(this.src)"
+              onerror="this.parentElement.style.display='none'" />
+            <div class="ev-card-body">
+              <div class="ev-excerpt">${(f.evidence||'').substring(0,140)}${f.evidence?.length>140?'…':''}</div>
+            </div>
+          </div>
+        `).join('') || '<div class="empty-state"><div class="es-icon">📸</div><p>No evidence images available</p></div>'}
+      </div>
+    </div>
+
+    <!-- Tab 3: Recommendations -->
+    <div id="adm-content-recs" class="tab-content ${curTab === 'recs' ? 'active' : ''}">
+      <div class="card">
+        <div class="card-title">AI Remediation Advice</div>
+        <div class="rec-list">
+          ${(run.recommendations||[]).map((r,i) => `
+            <div class="rec-item">
+              <div class="rec-num">${i+1}</div>
+              <div class="rec-text" style="font-size:12.5px;line-height:1.5">${r}</div>
+            </div>
+          `).join('') || '<div class="empty-state" style="padding:20px"><div class="es-icon">💡</div><p>No recommendations</p></div>'}
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab 4: Risk Breakdown & Expected vs Actual -->
+    <div id="adm-content-math" class="tab-content ${curTab === 'math' ? 'active' : ''}">
+      <div class="card" style="margin-bottom:16px">
+        <div style="margin-bottom:14px">
+          <h3 style="font-size:14px;font-weight:700;margin-bottom:4px;color:var(--text)">Risk Calculation Formula & Penalty Matrix</h3>
+          <p style="color:var(--text2);font-size:12px;line-height:1.5;margin:0">
+            Penalties are computed dynamically based on policy severity:
+            <span style="color:#ef4444;font-weight:700">Critical (+40 pts)</span>,
+            <span style="color:#fbbf24;font-weight:700">High (+25 pts)</span>,
+            <span style="color:#fcd34d;font-weight:700">Medium (+10 pts)</span>, and
+            <span style="color:#10b981;font-weight:700">Low (+5 pts)</span>.
+            Status Multiplier: 100% for NON_COMPLIANT / NOT_FOUND, 50% for PARTIALLY_COMPLIANT.
+          </p>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Policy Rule</th><th>Finding Status</th><th>Severity</th><th>Penalty Impact</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${(risk.contributors || []).map(c => `
+                <tr>
+                  <td><strong>${c.policy_id}</strong> <span style="color:var(--text2);font-size:11px">${c.policy_name}</span></td>
+                  <td><span class="status-dot ${c.status}">${(c.status || '').replace('_', ' ')}</span></td>
+                  <td><span class="sev-badge ${c.severity}">${c.severity}</span></td>
+                  <td style="font-weight:700;color:${c.penalty > 0 ? 'var(--fail)' : 'var(--pass)'}">+${c.penalty} pts</td>
+                </tr>
+              `).join('') || '<tr><td colspan="4" style="text-align:center;padding:12px;color:var(--text3)">No risk penalties</td></tr>'}
+              <tr style="border-top:2px solid var(--border)">
+                <td colspan="3" style="text-align:right;font-weight:700;padding:10px">Total Raw Risk Points:</td>
+                <td style="font-weight:800;color:var(--fail);padding:10px">${(risk.contributors || []).reduce((sum, c) => sum + (c.penalty || 0), 0)} pts</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Expected Policy Requirements vs Actual Contract Findings</div>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          ${(risk.contributors || []).map(c => `
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden">
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:rgba(255,255,255,0.02);border-bottom:1px solid var(--border)">
+                <div>
+                  <strong style="color:var(--accent);font-size:12px">${c.policy_id}</strong>
+                  <span style="font-size:12px;color:var(--text2);margin-left:6px">${c.policy_name}</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <span class="sev-badge ${c.severity}">${c.severity}</span>
+                  <span style="font-size:12px;font-weight:700;color:${c.penalty > 0 ? 'var(--fail)' : 'var(--pass)'}">+${c.penalty} pts</span>
+                </div>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px">
+                <div style="background:rgba(16,185,129,0.04);border:1px solid rgba(16,185,129,0.15);padding:10px;border-radius:6px;font-size:12px">
+                  <div style="font-size:10px;font-weight:700;color:var(--pass);text-transform:uppercase;margin-bottom:4px">Expected Compliance Rule:</div>
+                  <div style="color:var(--text)">${c.expected || c.expected_requirement || 'Must satisfy corporate policy guidelines.'}</div>
+                </div>
+                <div style="background:rgba(239,68,68,0.04);border:1px solid rgba(239,68,68,0.15);padding:10px;border-radius:6px;font-size:12px">
+                  <div style="font-size:10px;font-weight:700;color:var(--fail);text-transform:uppercase;margin-bottom:4px">Actual Contract Term Found:</div>
+                  <div style="color:var(--text)">${c.actual_evidence || c.actual_finding || 'Clause not found or non-compliant.'}</div>
+                </div>
+              </div>
+              ${c.status_reason ? `
+                <div style="padding:8px 12px;background:rgba(255,255,255,0.015);border-top:1px solid var(--border);font-size:11px;color:var(--text2)">
+                  <strong>Reasoning:</strong> ${c.status_reason}
+                </div>
+              ` : ''}
+            </div>
+          `).join('') || '<div class="empty-state"><p>No penalty breakdown available</p></div>'}
+        </div>
+      </div>
+    </div>
+
+    <!-- Executive Decision Box -->
+    <div class="decision-box">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:18px">⚖️</span>
+          <span style="font-size:14px;font-weight:700">Executive Compliance Officer Decision</span>
+        </div>
+        <div>
+          <span class="dec-badge ${dec}">${dec.replace('_', ' ')}</span>
+        </div>
+      </div>
+
+      ${decidedAt ? `
+        <div style="font-size:11px;color:var(--text3);margin-bottom:12px;padding:6px 12px;background:var(--surface);border-radius:6px">
+          Last decided by <strong style="color:var(--text2)">${reviewer}</strong> on ${decidedAt}
+        </div>
+      ` : ''}
+
+      ${(dec !== 'PENDING' && dec !== '' && dec !== null) ? `
+        <!-- Decision Finalized Box -->
+        <div id="adm-locked-decision-box" style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:8px;margin-bottom:14px;flex-wrap:wrap;gap:10px">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="font-size:22px">🔒</span>
+            <div>
+              <div style="font-size:13px;font-weight:700;color:var(--text)">
+                Decision Finalized: <span style="color:${isApproved ? 'var(--pass)' : (isRejected ? 'var(--fail)' : 'var(--accent)')}">${dec.replace('_', ' ')}</span>
+              </div>
+              <div style="font-size:11px;color:var(--text3);margin-top:2px">
+                Decision has been recorded. Action buttons are locked for this document.
+              </div>
+            </div>
+          </div>
+          <button class="btn btn-ghost" style="font-size:11px;padding:5px 12px" onclick="reopenAdminDecision('${run.run_id}')">
+            ✏️ Change Decision
+          </button>
+        </div>
+      ` : ''}
+
+      <div id="adm-action-buttons-wrapper" style="display:${(dec !== 'PENDING' && dec !== '' && dec !== null) ? 'none' : 'block'}">
+        <div class="form-group" style="margin-bottom:16px">
+          <label class="form-label" style="display:flex;justify-content:space-between;align-items:center">
+            <span>Compliance Decision Notes & Reasoning <strong style="color:var(--fail)">* (Mandatory)</strong></span>
+          </label>
+          <textarea id="adm-decision-notes" rows="3" class="form-input" 
+            placeholder="Enter mandatory justification, risk waiver rationale, or amendment directives..."
+            style="width:100%;font-size:13px;line-height:1.5;resize:vertical">${notes}</textarea>
+        </div>
+
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+          <button class="btn btn-primary" style="background:linear-gradient(135deg, #10b981, #059669);border:none" onclick="submitAdminDecision('${run.run_id}', 'APPROVED')">
+            ✅ Approve with Exception
+          </button>
+          <button class="btn btn-primary" style="background:linear-gradient(135deg, #ef4444, #dc2626);border:none" onclick="submitAdminDecision('${run.run_id}', 'REJECTED')">
+            ❌ Reject Contract
+          </button>
+          <button class="btn btn-ghost" style="border-color:var(--accent);color:var(--accent)" onclick="submitAdminDecision('${run.run_id}', 'AMENDMENT_REQUESTED')">
+            📝 Request Amendment
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function reopenAdminDecision(runId) {
+  const lockedBox = document.getElementById('adm-locked-decision-box');
+  const actionWrapper = document.getElementById('adm-action-buttons-wrapper');
+  if (lockedBox) lockedBox.style.display = 'none';
+  if (actionWrapper) actionWrapper.style.display = 'block';
+}
+
+function switchAdminTab(name) {
+  adminActiveTab = name;
+  ['violations', 'evidence', 'recs', 'math'].forEach(tab => {
+    const btn = document.getElementById(`adm-tabbtn-${tab}`);
+    const content = document.getElementById(`adm-content-${tab}`);
+    if (btn) btn.classList.toggle('active', tab === name);
+    if (content) content.classList.toggle('active', tab === name);
+  });
+}
+
+async function submitAdminDecision(runId, decision) {
+  const notesTextarea = document.getElementById('adm-decision-notes');
+  let notes = notesTextarea ? notesTextarea.value.trim() : '';
+
+  if (!notes) {
+    if (notesTextarea) {
+      notesTextarea.focus();
+      notesTextarea.style.border = '2px solid var(--fail)';
+      notesTextarea.style.background = 'rgba(239,68,68,0.08)';
+      setTimeout(() => {
+        if (notesTextarea) {
+          notesTextarea.style.border = '1px solid var(--border)';
+          notesTextarea.style.background = 'transparent';
+        }
+      }, 3500);
+    }
+    toast('⚠️ A justification description is MANDATORY before making a decision.');
+    return;
+  }
+
+  try {
+    const res = await fetch(`/api/admin/runs/${runId}/decision`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        decision: decision,
+        notes: notes,
+        reviewer: 'admin@compliance.ai'
+      })
+    });
+    if (!res.ok) throw new Error('Failed to record decision');
+
+    toast(`Decision recorded: ${decision.replace('_', ' ')}`);
+    await loadAdminFlaggedRuns(false);
+    await loadAdminRunDetail(runId, true);
+  } catch (err) {
+    toast(`Error saving decision: ${err.message}`);
+  }
+}
+
 // ─── Init ─────────────────────────────────────────────────────────────────────
 function initApp() {
+  initDemoAuth();
   loadPolicies();
   loadHistory();
   loadStats();
@@ -748,6 +1789,7 @@ function renderFileList() {
 }
 
 // ─── Run ──────────────────────────────────────────────────────────────────────
+// ─── Run ──────────────────────────────────────────────────────────────────────
 async function startRun() {
   if (!selectedFiles.length) return;
 
@@ -771,16 +1813,20 @@ async function startRun() {
     const resp = await fetch('/api/run', { method: 'POST', body: form });
     if (!resp.ok) { const e = await resp.json(); toast('Error: ' + (e.detail || resp.status)); showUpload(); return; }
     const data = await resp.json();
-    runIds = data.run_ids;
+    runIds = data.run_ids || [];
   } catch (e) { toast('Request failed: ' + e.message); showUpload(); return; }
 
-  // Listen to WebSocket progress for the first run (multi-file: we show batched view)
-  if (runIds.length === 1) {
-    connectWS(runIds[0]);
-  } else {
-    // For multiple files, open a WS per file and merge stage updates
-    runIds.forEach(rid => connectWS(rid));
+  if (!runIds.length) {
+    showUpload();
+    return;
   }
+
+  currentProgressRunId = runIds[0];
+  await loadHistory();
+  await loadStats();
+
+  // Listen to WebSocket progress immediately for all runs in batch
+  runIds.forEach(rid => connectWS(rid));
 
   // Poll for completion then show result
   await pollCompletion(runIds);
@@ -792,15 +1838,41 @@ function connectWS(runId) {
   ws.onmessage = (evt) => {
     try {
       const msg = JSON.parse(evt.data);
-      updateStageUI(msg.stage, msg.status);
+      const isCurrent = (!currentProgressRunId || currentProgressRunId === runId || currentProgressRunId === msg.run_id);
+
+      if (msg.stage === 'workflow') {
+        if (msg.status === 'COMPLETED' || msg.status === 'FAILED') {
+          fetch(`/api/runs/${runId}`).then(r => r.json()).then(run => {
+            loadHistory();
+            loadStats();
+            if (isCurrent) {
+              showResult(run);
+            }
+          }).catch(() => {});
+        }
+        return;
+      }
+      
+      if (!isCurrent) return;
+
+      let stageKey = msg.stage;
+      if (stageKey === 'template_check' || stageKey === 'risky_terms') stageKey = 'policy_matching';
+      updateStageUI(stageKey, msg.status);
+
       const lbl = document.getElementById('prog-stage-label');
-      if (lbl) lbl.textContent = `${msg.stage.replace(/_/g,' ')} — ${msg.status}`;
-    } catch {}
+      if (lbl) {
+        const stageObj = STAGES.find(s => s.key === stageKey);
+        const name = stageObj ? stageObj.label : stageKey.replace(/_/g, ' ');
+        lbl.textContent = `${name} — ${msg.status === 'RUNNING' ? 'Running...' : (msg.status === 'DONE' ? 'Completed ✓' : msg.status)}`;
+      }
+    } catch (e) {
+      console.debug('WS parse error:', e);
+    }
   };
 }
 
 async function pollCompletion(runIds) {
-  const POLL_INTERVAL = 3000;
+  const POLL_INTERVAL = 2000;
   const MAX_WAIT = 600000; // 10 minutes
   const start = Date.now();
 
@@ -811,8 +1883,13 @@ async function pollCompletion(runIds) {
       try {
         const r = await fetch(`/api/runs/${rid}`);
         const run = await r.json();
-        if (['PROCESSING', 'PENDING'].includes(run.processing_status)) { allDone = false; break; }
-      } catch { allDone = false; }
+        if (['PROCESSING', 'PENDING'].includes(run.processing_status)) {
+          allDone = false;
+          break;
+        }
+      } catch {
+        allDone = false;
+      }
     }
     if (allDone) break;
   }
@@ -820,13 +1897,17 @@ async function pollCompletion(runIds) {
   await loadHistory();
   await loadStats();
 
-  // Show result for first run (or last run if multiple)
-  const primaryId = runIds[runIds.length - 1];
-  try {
-    const r = await fetch(`/api/runs/${primaryId}`);
-    const run = await r.json();
-    showResult(run);
-  } catch {
+  // Show result for primary run
+  const primaryId = currentProgressRunId || runIds[0] || runIds[runIds.length - 1];
+  if (primaryId) {
+    try {
+      const r = await fetch(`/api/runs/${primaryId}`);
+      const run = await r.json();
+      showResult(run);
+    } catch {
+      showUpload();
+    }
+  } else {
     showUpload();
   }
   selectedFiles = [];
@@ -836,7 +1917,8 @@ async function pollCompletion(runIds) {
 // ─── Stage UI ─────────────────────────────────────────────────────────────────
 const stageState = {};
 
-function showProgress(docName) {
+function showProgress(docName, runId = null) {
+  currentProgressRunId = runId;
   document.getElementById('upload-panel').style.display   = 'none';
   document.getElementById('progress-panel').style.display = 'block';
   document.getElementById('result-panel').style.display   = 'none';
@@ -844,6 +1926,7 @@ function showProgress(docName) {
   document.getElementById('panel-title').textContent = 'Running Analysis';
   document.getElementById('panel-sub').textContent   = docName;
   document.getElementById('prog-doc-name').textContent = docName;
+  document.getElementById('prog-stage-label').textContent = 'Starting workflow...';
 
   const grid = document.getElementById('stages-grid');
   grid.innerHTML = '';
@@ -861,14 +1944,54 @@ function showProgress(docName) {
 }
 
 function updateStageUI(stage, status) {
-  const card   = document.getElementById(`sc-${stage}`);
-  const icon   = document.getElementById(`si-${stage}`);
-  const lbl    = document.getElementById(`ss-${stage}`);
+  if (stage === 'template_check' || stage === 'risky_terms') stage = 'policy_matching';
+  const targetIdx = STAGES.findIndex(s => s.key === stage);
+  if (targetIdx === -1) return;
+
+  // 1. Mark all preceding stages as Completed ✓
+  for (let i = 0; i < targetIdx; i++) {
+    const prevKey = STAGES[i].key;
+    const prevCard = document.getElementById(`sc-${prevKey}`);
+    const prevIcon = document.getElementById(`si-${prevKey}`);
+    const prevLbl  = document.getElementById(`ss-${prevKey}`);
+    if (prevCard) {
+      prevCard.className = 'stage-card done';
+      if (prevLbl) prevLbl.textContent = 'Completed ✓';
+      if (prevIcon) prevIcon.textContent = '✅';
+    }
+  }
+
+  // 2. Update the target stage card
+  const card = document.getElementById(`sc-${stage}`);
+  const icon = document.getElementById(`si-${stage}`);
+  const lbl  = document.getElementById(`ss-${stage}`);
   if (!card) return;
-  card.className = 'stage-card';
-  if (status === 'RUNNING') { card.classList.add('running'); if (lbl) lbl.textContent = 'Running...'; }
-  else if (status === 'DONE') { card.classList.add('done'); if (lbl) lbl.textContent = 'Completed ✓'; if (icon) icon.textContent = '✅'; }
-  else if (status === 'FAILED') { card.classList.add('failed'); if (lbl) lbl.textContent = 'Failed'; }
+
+  if (status === 'RUNNING') {
+    card.className = 'stage-card running';
+    if (lbl) lbl.textContent = 'Running...';
+    if (icon) icon.textContent = STAGES[targetIdx].icon;
+
+    // Reset succeeding stages to Waiting
+    for (let i = targetIdx + 1; i < STAGES.length; i++) {
+      const nextKey = STAGES[i].key;
+      const nextCard = document.getElementById(`sc-${nextKey}`);
+      const nextIcon = document.getElementById(`si-${nextKey}`);
+      const nextLbl  = document.getElementById(`ss-${nextKey}`);
+      if (nextCard && !nextCard.classList.contains('done')) {
+        nextCard.className = 'stage-card';
+        if (nextLbl) nextLbl.textContent = 'Waiting';
+        if (nextIcon) nextIcon.textContent = STAGES[i].icon;
+      }
+    }
+  } else if (status === 'DONE') {
+    card.className = 'stage-card done';
+    if (lbl) lbl.textContent = 'Completed ✓';
+    if (icon) icon.textContent = '✅';
+  } else if (status === 'FAILED') {
+    card.className = 'stage-card failed';
+    if (lbl) lbl.textContent = 'Failed';
+  }
 }
 
 // ─── History ──────────────────────────────────────────────────────────────────
@@ -896,8 +2019,10 @@ function renderHistory(runs) {
   if (!runs.length) { list.innerHTML = '<div class="empty-state"><div class="es-icon">📂</div><p>No runs yet</p></div>'; return; }
   list.innerHTML = '';
   runs.forEach(r => {
-    const status = r.is_contract === 0 ? 'SKIPPED' : (r.processing_status === 'FAILED' ? 'FAILED' : (r.processing_status === 'PROCESSING' ? 'PROCESSING' : (r.overall_status || r.processing_status)));
-    const cls = { PASS:'pass', RISK:'risk', FAIL:'fail', SKIPPED:'skip', PROCESSING:'proc', FAILED:'fail' }[status] || 'skip';
+    const isApproved = r.admin_decision === 'APPROVED' || r.overall_status === 'APPROVED';
+    const isRejected = r.admin_decision === 'REJECTED' || r.overall_status === 'REJECTED';
+    const status = isApproved ? 'APPROVED' : (isRejected ? 'REJECTED' : (r.is_contract === 0 ? 'SKIPPED' : (r.processing_status === 'FAILED' ? 'FAILED' : (r.processing_status === 'PROCESSING' ? 'PROCESSING' : (r.overall_status || r.processing_status)))));
+    const cls = { PASS:'pass', APPROVED:'pass', RISK:'risk', FAIL:'fail', REJECTED:'fail', SKIPPED:'skip', PROCESSING:'proc', FAILED:'fail' }[status] || 'skip';
     const _ts = r.created_at && !r.created_at.endsWith('Z') && !r.created_at.includes('+') ? r.created_at + 'Z' : r.created_at; const _d = _ts ? new Date(_ts) : null; const time = _d ? _d.toLocaleString(undefined, {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}) : '';
     const el = document.createElement('div');
     el.className = `hist-item ${cls}`;
@@ -926,8 +2051,16 @@ async function viewRun(runId) {
   try {
     const res = await fetch(`/api/runs/${runId}`);
     const run = await res.json();
-    showResult(run);
-  } catch {}
+    if (run.processing_status === 'PROCESSING' || run.processing_status === 'PENDING') {
+      showProgress(run.file_name, run.run_id);
+      connectWS(run.run_id);
+      pollCompletion([run.run_id]);
+    } else {
+      showResult(run);
+    }
+  } catch (err) {
+    console.error('viewRun error:', err);
+  }
 }
 
 async function deleteRun(event, runId) {
@@ -943,11 +2076,12 @@ async function deleteRun(event, runId) {
 
 // ─── Result Panel ─────────────────────────────────────────────────────────────
 function showResult(run) {
-  document.getElementById('upload-panel').style.display   = 'none';
-  document.getElementById('progress-panel').style.display = 'none';
-  document.getElementById('result-panel').style.display   = 'block';
-  document.getElementById('panel-title').textContent = run.file_name;
-  document.getElementById('panel-sub').textContent   = `Run ID: ${run.run_id}`;
+  document.getElementById('upload-panel').style.display     = 'none';
+  document.getElementById('progress-panel').style.display   = 'none';
+  document.getElementById('monitoring-panel').style.display = 'none';
+  document.getElementById('result-panel').style.display     = 'block';
+  document.getElementById('panel-title').textContent = 'Compliance Analysis Result';
+  document.getElementById('panel-sub').textContent   = `Document: ${run.file_name}`;
 
   const panel = document.getElementById('result-panel');
 
@@ -977,7 +2111,11 @@ function showResult(run) {
     return;
   }
 
-  const riskColor = { LOW: '#10b981', MEDIUM: '#f59e0b', HIGH: '#f97316', CRITICAL: '#ef4444' }[run.risk_level] || '#6b7280';
+  const isApproved = run.admin_decision === 'APPROVED' || run.overall_status === 'APPROVED';
+  const isRejected = run.admin_decision === 'REJECTED' || run.overall_status === 'REJECTED';
+  const displayStatus = isApproved ? 'APPROVED' : (isRejected ? 'REJECTED' : (run.overall_status || 'FAIL'));
+  const statusIcon = { PASS:'✅', APPROVED:'✅', RISK:'⚠️', FAIL:'❌', REJECTED:'❌', SKIPPED:'⏭️' }[(displayStatus || '').toUpperCase()] || '📋';
+  const riskColor = isApproved ? '#10b981' : ({ LOW: '#10b981', MEDIUM: '#f59e0b', HIGH: '#f97316', CRITICAL: '#ef4444' }[run.risk_level] || '#6b7280');
   const riskScore = run.risk_score ?? 0;
   const circumference = 2 * Math.PI * 36;
   const offset = circumference - (riskScore / 100) * circumference;
@@ -989,16 +2127,35 @@ function showResult(run) {
         <div class="result-meta">Run ID: ${run.run_id} &nbsp;·&nbsp; ${new Date(run.created_at).toLocaleString()}</div>
       </div>
       <div class="result-actions">
+        <a href="/api/runs/${run.run_id}/document" download="${run.file_name}" class="btn btn-primary">📥 Download File</a>
         <a href="/api/runs/${run.run_id}/report" download class="btn btn-ghost">⬇ Report</a>
         <button class="btn btn-ghost" onclick="showUpload()">+ New Run</button>
       </div>
     </div>
 
+    ${isApproved ? `
+      <!-- Admin Approval Notice for User -->
+      <div style="background:linear-gradient(135deg, rgba(16,185,129,0.14), rgba(5,150,105,0.06));border:1px solid rgba(16,185,129,0.4);border-radius:var(--radius);padding:14px 18px;margin-bottom:18px;box-shadow:0 0 16px rgba(16,185,129,0.1)">
+        <div style="display:flex;align-items:center;gap:8px;font-weight:700;font-size:13.5px;color:var(--pass);margin-bottom:4px">
+          <span>✅</span>
+          <span>Contract Approved with Executive Exception by Compliance Officer</span>
+        </div>
+        <div style="font-size:12.5px;color:var(--text);line-height:1.5">
+          <strong style="color:var(--pass)">Reason for Approval:</strong> ${run.admin_notes || 'Approved under corporate compliance exception based on commercial assessment.'}
+        </div>
+        ${run.admin_decided_at ? `
+          <div style="font-size:11px;color:var(--text3);margin-top:4px">
+            Approved by <strong>${run.admin_reviewer || 'admin@compliance.ai'}</strong> on ${new Date(run.admin_decided_at).toLocaleString()}
+          </div>
+        ` : ''}
+      </div>
+    ` : ''}
+
     <div class="kpi-row">
       <div class="kpi-card">
         <div class="kpi-label">Compliance Status</div>
-        <span class="status-badge-lg ${run.overall_status}">
-          ${{ PASS:'✅', RISK:'⚠️', FAIL:'❌' }[run.overall_status] || '?'} ${run.overall_status}
+        <span class="status-badge-lg ${displayStatus}">
+          ${statusIcon} ${displayStatus}
         </span>
       </div>
       <div class="kpi-card" style="text-align:center">
@@ -1229,8 +2386,97 @@ function switchTab(name) {
   document.getElementById('tab-' + name)?.classList.add('active');
 }
 
-// ─── Panels ───────────────────────────────────────────────────────────────────
+// ─── Human-Friendly Activity & Logs Logic ────────────────────────────────────
 let allLogs = [];
+
+const STAGE_LOOKUP = {
+  workflow: { name: 'Workflow Lifecycle', icon: '🚀', color: '#5b6ef5' },
+  ingestion: { name: 'Document Ingestion', icon: '📥', color: '#38bdf8' },
+  classification: { name: 'Contract Classification', icon: '🏷️', color: '#818cf8' },
+  obligation_extraction: { name: 'Extract Obligations', icon: '📋', color: '#a78bfa' },
+  template_check: { name: 'Template Check', icon: '📑', color: '#c084fc' },
+  risky_terms: { name: 'Risky Terms Review', icon: '⚠️', color: '#fb923c' },
+  policy_matching: { name: 'Policy Matching', icon: '⚖️', color: '#34d399' },
+  compliance_validation: { name: 'Compliance Validation', icon: '✅', color: '#10b981' },
+  risk_scoring: { name: 'Risk Scoring', icon: '📊', color: '#f59e0b' },
+  evidence_generation: { name: 'Evidence Capture', icon: '🖼️', color: '#ec4899' },
+  api: { name: 'System API', icon: '⚙️', color: '#94a3b8' }
+};
+
+function formatStageInfo(stageKey) {
+  const key = (stageKey || '').toLowerCase();
+  if (STAGE_LOOKUP[key]) return STAGE_LOOKUP[key];
+  const pretty = key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+  return { name: pretty || 'General Event', icon: '⚡', color: '#94a3b8' };
+}
+
+function formatHumanDescription(log) {
+  const event = (log.event || '').toLowerCase();
+  const msg = log.message || '';
+
+  // Extract clean filename if present
+  let docName = '';
+  if (log.file_path) {
+    docName = log.file_path.split(/[\\/]/).pop().replace(/^[a-f0-9-]+_/, '');
+  } else if (msg.includes('file_path=')) {
+    const match = msg.match(/file_path=['"]?([^'",)\s]+)/);
+    if (match) docName = match[1].split(/[\\/]/).pop().replace(/^[a-f0-9-]+_/, '');
+  }
+
+  if (event === 'workflow_started' || msg.includes('workflow_started')) {
+    return docName ? `🚀 Started compliance analysis for <strong>${docName}</strong>` : '🚀 Started compliance review workflow for uploaded document';
+  }
+  if (event === 'workflow_completed' || msg.includes('workflow_completed')) {
+    return '🎉 Analysis finished successfully and generated compliance report & audit trail';
+  }
+  if (event === 'ingestion_completed' || msg.includes('ingestion_completed')) {
+    return '📥 Document text parsed and prepared for multi-agent evaluation';
+  }
+  if (event === 'classification_completed' || msg.includes('classification_completed')) {
+    return '🏷️ Analyzed document and verified it is a valid contract';
+  }
+  if (event === 'obligation_extraction_completed' || msg.includes('obligation_extraction_completed')) {
+    return '📋 Extracted key clauses, party obligations, and performance deadlines';
+  }
+  if (event === 'template_check_completed' || msg.includes('template_check_completed')) {
+    return '📑 Checked contract clauses against standard baseline templates';
+  }
+  if (event === 'risky_terms_completed' || msg.includes('risky_terms_completed')) {
+    return '⚠️ Identified potential liability risks and uncapped indemnification clauses';
+  }
+  if (event === 'policy_matching_completed' || msg.includes('policy_matching_completed')) {
+    return '⚖️ Matched contract clauses against compliance policy rules';
+  }
+  if (event === 'compliance_validation_completed' || msg.includes('compliance_validation_completed')) {
+    return '✅ Validated contract clauses against required policy rules';
+  }
+  if (event === 'risk_scoring_completed' || msg.includes('risk_scoring_completed')) {
+    return '📊 Calculated final compliance score and risk breakdown';
+  }
+  if (event === 'evidence_generation_completed' || msg.includes('evidence_generation_completed')) {
+    return '🖼️ Generated visual audit cards and highlight snapshots';
+  }
+
+  if (log.level === 'ERROR' || log.error) {
+    const errText = log.error || msg.replace(/^\[.*?\]\s*/, '');
+    return `<span style="color:var(--fail)">❌ Issue encountered: ${errText}</span>`;
+  }
+
+  // Clean raw bracketed messages like "[stage] message (run_id=...)"
+  let clean = msg.replace(/^\[.*?\]\s*/, '').replace(/\(run_id=.*?\)/, '').trim();
+  clean = clean.replace(/_/g, ' ');
+  if (clean.length > 0) {
+    clean = clean.charAt(0).toUpperCase() + clean.slice(1);
+  }
+  return clean || 'Processed system operation';
+}
+
+function formatDurationPretty(ms) {
+  if (ms === undefined || ms === null || isNaN(ms)) return '—';
+  if (ms < 10) return '< 0.1s';
+  if (ms < 1000) return `${(ms / 1000).toFixed(2)}s`;
+  return `${(ms / 1000).toFixed(1)}s`;
+}
 
 function showUpload() {
   document.getElementById('upload-panel').style.display     = 'block';
@@ -1242,72 +2488,141 @@ function showUpload() {
   document.querySelectorAll('.hist-item').forEach(el => el.classList.remove('active'));
 }
 
-async function showMonitoring() {
+async function showLogs() {
   document.getElementById('upload-panel').style.display     = 'none';
   document.getElementById('progress-panel').style.display   = 'none';
   document.getElementById('result-panel').style.display     = 'none';
   document.getElementById('monitoring-panel').style.display = 'block';
-  document.getElementById('panel-title').textContent = 'System Monitoring & Logs';
-  document.getElementById('panel-sub').textContent   = 'Real-time telemetry, agent metrics, and structured event stream';
+  document.getElementById('panel-title').textContent = 'System Activity & Logs';
+  document.getElementById('panel-sub').textContent   = 'Human-readable live audit trail and operational status';
   document.querySelectorAll('.hist-item').forEach(el => el.classList.remove('active'));
-  await loadMonitoringLogs();
+  await loadLogs();
 }
+const showMonitoring = showLogs;
 
-async function loadMonitoringLogs() {
+async function loadLogs() {
   try {
     const res = await fetch('/api/logs?limit=200');
     const data = await res.json();
     allLogs = (data.logs || []).reverse();
-    document.getElementById('mon-log-count').textContent = allLogs.length;
+    
+    // Update KPI counters
+    const countEl = document.getElementById('mon-log-count');
+    if (countEl) countEl.textContent = allLogs.length;
+    const badgeEl = document.getElementById('log-count-badge');
+    if (badgeEl) badgeEl.textContent = `${allLogs.length} events`;
+    
+    const errors = allLogs.filter(l => (l.level || '').toUpperCase() === 'ERROR' || l.error).length;
+    const warnings = allLogs.filter(l => (l.level || '').toUpperCase() === 'WARNING').length;
+    const issues = errors + warnings;
+    const issueEl = document.getElementById('mon-issue-count');
+    const issueSub = document.getElementById('mon-issue-sub');
+    if (issueEl) {
+      issueEl.textContent = issues;
+      issueEl.style.color = issues > 0 ? (errors > 0 ? 'var(--fail)' : 'var(--risk)') : 'var(--pass)';
+    }
+    if (issueSub) {
+      issueSub.textContent = issues === 0 ? 'No issues detected' : `${errors} errors, ${warnings} warnings`;
+    }
 
     const statsRes = await fetch('/api/stats');
     const stats = await statsRes.json();
-    document.getElementById('mon-total-runs').textContent = stats.total_runs || 0;
-    const rate = stats.total_runs > 0 ? ((stats.passed / stats.total_runs) * 100).toFixed(0) + '% Pass Rate' : 'No runs yet';
-    document.getElementById('mon-pass-rate').textContent = rate;
+    const runsEl = document.getElementById('mon-total-runs');
+    if (runsEl) runsEl.textContent = stats.total_runs || 0;
+    const passRateEl = document.getElementById('mon-pass-rate');
+    if (passRateEl) {
+      passRateEl.textContent = stats.total_runs > 0 ? `${((stats.passed / stats.total_runs) * 100).toFixed(0)}% Pass Rate` : 'No runs yet';
+    }
 
     renderLogsTable();
   } catch (e) {
     console.error(e);
   }
 }
+const loadMonitoringLogs = loadLogs;
+
+async function clearAllLogs() {
+  if (!confirm('Are you sure you want to clear all activity logs?')) return;
+  try {
+    const res = await fetch('/api/logs', { method: 'DELETE' });
+    if (res.ok) {
+      allLogs = [];
+      document.getElementById('mon-log-count').textContent = '0';
+      const badgeEl = document.getElementById('log-count-badge');
+      if (badgeEl) badgeEl.textContent = '0 events';
+      document.getElementById('mon-issue-count').textContent = '0';
+      document.getElementById('mon-issue-count').style.color = 'var(--pass)';
+      document.getElementById('mon-issue-sub').textContent = 'No issues detected';
+      renderLogsTable();
+      toast('🗑️ All activity logs cleared successfully');
+    } else {
+      toast('Failed to clear logs');
+    }
+  } catch (e) {
+    toast('Error clearing logs: ' + e.message);
+  }
+}
 
 function renderLogsTable() {
   const tbody = document.getElementById('logs-tbody');
+  if (!tbody) return;
   const search = (document.getElementById('log-search')?.value || '').toLowerCase();
   const levelFilter = document.getElementById('log-level-filter')?.value || 'ALL';
 
   const filtered = allLogs.filter(l => {
-    if (levelFilter !== 'ALL' && (l.level || '').toUpperCase() !== levelFilter) return false;
+    const lvl = (l.level || 'INFO').toUpperCase();
+    if (levelFilter === 'ERROR' && lvl !== 'ERROR') return false;
+    if (levelFilter === 'WARNING' && lvl !== 'WARNING') return false;
+    if (levelFilter === 'INFO' && lvl !== 'INFO') return false;
+
     if (search) {
-      const line = JSON.stringify(l).toLowerCase();
+      const line = (JSON.stringify(l) + ' ' + formatHumanDescription(l)).toLowerCase();
       if (!line.includes(search)) return false;
     }
     return true;
   });
 
   if (!filtered.length) {
-    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:20px">No matching log records found</td></tr>';
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="6" style="text-align:center;padding:48px 20px;">
+          <div style="font-size:36px;margin-bottom:10px">✨</div>
+          <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:6px">No Activity Logs Found</div>
+          <div style="font-size:12px;color:var(--text3);max-width:400px;margin:0 auto 16px;line-height:1.5">
+            ${allLogs.length === 0 ? 'All logs have been cleared. When you analyze a contract, plain-English progress updates and audit trail events will appear here in real time.' : 'No logs match your current search or filter criteria.'}
+          </div>
+          <button class="btn btn-primary" style="padding:6px 16px;font-size:12px;display:inline-flex;align-items:center;gap:6px" onclick="showUpload()">
+            ▶ Run Compliance Analysis
+          </button>
+        </td>
+      </tr>
+    `;
     return;
   }
 
   tbody.innerHTML = filtered.slice(0, 100).map(l => {
     const level = (l.level || 'INFO').toUpperCase();
     const lvlCls = level === 'ERROR' ? 'sev-badge CRITICAL' : (level === 'WARNING' ? 'sev-badge HIGH' : 'sev-badge LOW');
-    const timeStr = l.timestamp ? new Date(l.timestamp).toLocaleTimeString() : '—';
-    const durStr = l.duration_ms ? `${l.duration_ms.toFixed(0)} ms` : '—';
-    const runIdStr = l.run_id ? `<span style="font-family:monospace;font-size:10px;color:var(--accent)" title="${l.run_id}">${l.run_id.substring(0,8)}…</span>` : '—';
-    const msg = l.message || l.event || '—';
-    const stage = l.stage || l.logger || 'workflow';
+    const lvlText = level === 'ERROR' ? '🔴 Error' : (level === 'WARNING' ? '🟡 Warning' : '🟢 Normal');
+    const timeStr = l.timestamp ? new Date(l.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '—';
+    const durStr = formatDurationPretty(l.duration_ms);
+    const stageInfo = formatStageInfo(l.stage || l.logger || l.agent);
+    const description = formatHumanDescription(l);
+    const runIdStr = l.run_id ? `<span style="font-family:var(--mono);font-size:10px;padding:2px 6px;border-radius:4px;background:var(--surface);border:1px solid var(--border);color:var(--accent)" title="Run ID: ${l.run_id}">${l.run_id.substring(0,8)}</span>` : '—';
 
     return `
-      <tr>
+      <tr style="transition:background 0.15s">
         <td style="color:var(--text3);white-space:nowrap;font-size:11px">${timeStr}</td>
-        <td><span class="${lvlCls}">${level}</span></td>
-        <td><strong style="color:var(--accent);font-size:11px">${stage}</strong></td>
-        <td style="font-size:11px;color:var(--text);max-width:380px;word-break:break-word">${msg}</td>
+        <td><span class="${lvlCls}" style="font-size:10px;letter-spacing:0.3px">${lvlText}</span></td>
+        <td>
+          <div style="display:flex;align-items:center;gap:6px">
+            <span style="font-size:13px">${stageInfo.icon}</span>
+            <span style="font-weight:600;font-size:12px;color:var(--text)">${stageInfo.name}</span>
+          </div>
+        </td>
+        <td style="font-size:12px;color:var(--text);max-width:440px;line-height:1.4">${description}</td>
         <td>${runIdStr}</td>
-        <td style="color:var(--text2);font-size:11px">${durStr}</td>
+        <td style="color:var(--text2);font-size:11px;text-align:right;white-space:nowrap;font-weight:500">${durStr}</td>
       </tr>
     `;
   }).join('');
