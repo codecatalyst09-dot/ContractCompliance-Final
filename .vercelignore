@@ -1,0 +1,11 @@
+.env
+.env.*
+.git
+.pytest_cache
+tests
+documents
+outputs
+uploads
+database
+logs
+*.md
