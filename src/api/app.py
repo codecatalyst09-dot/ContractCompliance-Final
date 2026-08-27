@@ -53,22 +53,28 @@ app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
 # ── WebSocket Manager ─────────────────────────────────────────────────────────
 class ConnectionManager:
     def __init__(self):
-        self.active: dict[str, WebSocket] = {}
+        self.active: dict[str, list[WebSocket]] = {}
 
     async def connect(self, run_id: str, ws: WebSocket):
         await ws.accept()
-        self.active[run_id] = ws
+        if run_id not in self.active:
+            self.active[run_id] = []
+        self.active[run_id].append(ws)
 
-    def disconnect(self, run_id: str):
-        self.active.pop(run_id, None)
+    def disconnect(self, run_id: str, ws: Optional[WebSocket] = None):
+        if run_id in self.active:
+            if ws and ws in self.active[run_id]:
+                self.active[run_id].remove(ws)
+            if not ws or not self.active[run_id]:
+                self.active.pop(run_id, None)
 
     async def send(self, run_id: str, data: dict):
-        ws = self.active.get(run_id)
-        if ws:
+        sockets = list(self.active.get(run_id, []))
+        for ws in sockets:
             try:
                 await ws.send_json(data)
             except Exception:
-                self.disconnect(run_id)
+                self.disconnect(run_id, ws)
 
 manager = ConnectionManager()
 
@@ -829,4 +835,6 @@ async def websocket_endpoint(websocket: WebSocket, run_id: str):
         while True:
             await websocket.receive_text()   # keep alive
     except WebSocketDisconnect:
-        manager.disconnect(run_id)
+        manager.disconnect(run_id, websocket)
+    except Exception:
+        manager.disconnect(run_id, websocket)
