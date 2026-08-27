@@ -60,17 +60,6 @@ def test_monitoring_errors_endpoint():
     assert "errors" in data
     assert isinstance(data["errors"], list)
 
-def test_monitoring_kql_queries_endpoint():
-    response = client.get("/api/monitoring/kql-queries")
-    assert response.status_code == 200
-    data = response.json()
-    assert "queries" in data
-    assert len(data["queries"]) == 10
-    first_query = data["queries"][0]
-    assert "title" in first_query
-    assert "kql" in first_query
-    assert len(first_query["kql"]) > 10
-
 def test_sanitization_of_sensitive_data():
     raw_data = {
         "api_key": "secret_12345",

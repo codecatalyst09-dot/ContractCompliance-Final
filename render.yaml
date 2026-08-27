@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: contract-compliance-agent
+    runtime: python
+    buildCommand: pip install --upgrade pip && pip install -r requirements.txt
+    startCommand: uvicorn src.api.app:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: ENVIRONMENT
+        value: production
+      - key: FOUNDRY_OPENAI_BASE_URL
+        sync: false
+      - key: FOUNDRY_API_KEY
+        sync: false
+      - key: FOUNDRY_MODEL
+        value: gpt-4.1-mini
+      - key: DOCUMENT_INTELLIGENCE_ENDPOINT
+        sync: false
+      - key: DOCUMENT_INTELLIGENCE_API_KEY
+        sync: false
+      - key: APPLICATIONINSIGHTS_CONNECTION_STRING
+        sync: false
+      - key: ENABLE_SENSITIVE_DATA
+        value: "false"

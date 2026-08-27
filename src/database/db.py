@@ -84,7 +84,8 @@ CREATE TABLE IF NOT EXISTS findings (
     severity        TEXT,
     finding         TEXT,
     evidence        TEXT,
-    image_path      TEXT
+    image_path      TEXT,
+    page_number     INTEGER
 );
 
 CREATE TABLE IF NOT EXISTS recommendations (
@@ -109,6 +110,12 @@ def init_db() -> None:
         ]:
             if col not in existing_cols:
                 conn.execute(f"ALTER TABLE runs ADD COLUMN {col} {ctype}")
+        
+        # Migrate findings table if page_number is missing
+        finding_cols = [r["name"] for r in conn.execute("PRAGMA table_info(findings)").fetchall()]
+        if "page_number" not in finding_cols:
+            conn.execute("ALTER TABLE findings ADD COLUMN page_number INTEGER")
+
         # Clean up any stale processing runs left over from server restarts
         conn.execute("UPDATE runs SET processing_status='FAILED', error_message='Interrupted by server restart' WHERE processing_status='PROCESSING'")
 
@@ -193,15 +200,17 @@ def update_run_from_result(run_id: str, result: Any, policy_file: str) -> None:
         if r.compliance:
             for f in r.compliance.findings:
                 img_path = None
+                page_num = None
                 if r.evidence:
                     for ev in r.evidence.evidence_items:
                         if ev.policy_id == f.policy_id:
                             img_path = ev.image_path
+                            page_num = ev.page_number
                             break
                 conn.execute(
                     """
-                    INSERT INTO findings (run_id, policy_id, policy_name, clause_ref, status, severity, finding, evidence, image_path)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    INSERT INTO findings (run_id, policy_id, policy_name, clause_ref, status, severity, finding, evidence, image_path, page_number)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """,
                     (
                         run_id,
@@ -213,6 +222,7 @@ def update_run_from_result(run_id: str, result: Any, policy_file: str) -> None:
                         f.finding,
                         f.evidence,
                         img_path,
+                        page_num,
                     ),
                 )
 

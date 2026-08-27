@@ -148,7 +148,128 @@ async def api_get_original_document(run_id: str):
         ".txt": "text/plain"
     }
     media_type = media_types.get(ext, "application/octet-stream")
-    return FileResponse(file_path, media_type=media_type, filename=file_name)
+    return FileResponse(file_path, media_type=media_type, filename=file_name, content_disposition_type="inline")
+
+
+@app.get("/api/runs/{run_id}/document-text")
+async def api_get_document_text(run_id: str):
+    """Return extracted text content with page-level segments for read-only preview."""
+    run = get_run(run_id)
+    if not run:
+        raise HTTPException(status_code=404, detail="Run not found")
+    
+    file_path = run.get("file_path")
+    if not file_path or not os.path.exists(file_path):
+        file_name = run.get("file_name", "")
+        candidates = list(Path("uploads").glob(f"*{file_name}*")) + list(Path("documents").glob(f"*{file_name}*"))
+        if candidates and candidates[0].is_file():
+            file_path = str(candidates[0])
+        else:
+            file_path = ""
+
+    ext = Path(file_path).suffix.lower() if file_path else (Path(run.get("file_name", "")).suffix.lower())
+    pages_data = []
+
+    if file_path and os.path.exists(file_path):
+        if ext == ".txt":
+            try:
+                with open(file_path, "r", encoding="utf-8", errors="replace") as f:
+                    pages_data.append({"page_number": 1, "text": f.read()})
+            except Exception:
+                pages_data.append({"page_number": 1, "text": "Could not read text file."})
+        elif ext == ".pdf":
+            try:
+                import fitz
+                doc = fitz.open(file_path)
+                for idx, page in enumerate(doc):
+                    pages_data.append({"page_number": idx + 1, "text": page.get_text()})
+            except Exception:
+                pass
+        elif ext in [".docx", ".doc"]:
+            try:
+                from src.ingestion.docx_extractor import extract_docx
+                pages, full_text, tables = extract_docx(file_path)
+                if pages:
+                    for p in pages:
+                        pages_data.append({"page_number": p.page_number, "text": p.text})
+                elif full_text:
+                    pages_data.append({"page_number": 1, "text": full_text})
+            except Exception:
+                try:
+                    import docx
+                    d = docx.Document(file_path)
+                    paragraphs = [p.text for p in d.paragraphs if p.text.strip()]
+                    full_text = "\n\n".join(paragraphs)
+                    pages_data.append({"page_number": 1, "text": full_text})
+                except Exception:
+                    pass
+
+    # Fallback to saved audit JSON if file is missing or extraction was empty
+    if not pages_data:
+        audit_path = f"outputs/audit/{run_id}_audit.json"
+        comp_path = f"outputs/compliance/{run_id}_compliance.json"
+        for p in [audit_path, comp_path]:
+            if os.path.exists(p):
+                try:
+                    with open(p, "r", encoding="utf-8") as f:
+                        data = json.load(f)
+                        doc_data = data.get("document", {})
+                        raw_pages = doc_data.get("pages", [])
+                        if raw_pages:
+                            for idx, pg in enumerate(raw_pages):
+                                pages_data.append({
+                                    "page_number": pg.get("page_number", idx + 1),
+                                    "text": pg.get("text", "")
+                                })
+                        elif doc_data.get("text"):
+                            pages_data.append({"page_number": 1, "text": doc_data.get("text")})
+                    if pages_data:
+                        break
+                except Exception:
+                    pass
+
+    return {
+        "run_id": run_id,
+        "file_name": run.get("file_name"),
+        "file_type": ext.replace(".", "") if ext else "unknown",
+        "total_pages": len(pages_data),
+        "pages": pages_data
+    }
+
+
+@app.get("/api/runs/{run_id}/page-image/{page_number}")
+async def api_get_page_image(run_id: str, page_number: int):
+    """Render a specific PDF page as a high-resolution JPEG image for authentic document view."""
+    from fastapi.responses import Response
+    run = get_run(run_id)
+    if not run:
+        raise HTTPException(status_code=404, detail="Run not found")
+    
+    file_path = run.get("file_path")
+    if not file_path or not os.path.exists(file_path):
+        file_name = run.get("file_name", "")
+        candidates = list(Path("uploads").glob(f"*{file_name}*")) + list(Path("documents").glob(f"*{file_name}*"))
+        if candidates and candidates[0].is_file():
+            file_path = str(candidates[0])
+        else:
+            raise HTTPException(status_code=404, detail="Original document not found")
+
+    ext = Path(file_path).suffix.lower()
+    if ext != ".pdf":
+        raise HTTPException(status_code=400, detail="Page images are only available for PDF documents")
+
+    try:
+        import fitz
+        doc = fitz.open(file_path)
+        if page_number < 1 or page_number > len(doc):
+            raise HTTPException(status_code=400, detail=f"Invalid page number. Document has {len(doc)} pages.")
+        
+        page = doc[page_number - 1]
+        pix = page.get_pixmap(dpi=150)
+        img_bytes = pix.tobytes("jpeg")
+        return Response(content=img_bytes, media_type="image/jpeg")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to render page: {str(e)}")
 
 
 @app.get("/api/evidence/{run_id}/{policy_id}")
