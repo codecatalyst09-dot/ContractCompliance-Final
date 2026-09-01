@@ -24,7 +24,7 @@ from pydantic import BaseModel
 
 from src.database.db import (
     init_db, create_run, update_run_from_result, mark_run_failed,
-    get_all_runs, get_run, delete_run, get_stats,
+    get_all_runs, get_run, delete_run, delete_all_runs, get_stats,
     get_flagged_runs, set_admin_decision, get_admin_stats
 )
 from src.workflow.compliance_workflow import ContractComplianceWorkflow, get_compliance_workflow
@@ -118,6 +118,12 @@ async def api_delete_run(run_id: str):
     if not deleted:
         raise HTTPException(status_code=404, detail="Run not found")
     return {"deleted": True, "run_id": run_id}
+
+
+@app.delete("/api/runs")
+async def api_delete_all_runs():
+    count = delete_all_runs()
+    return {"deleted_all": True, "count": count}
 
 
 @app.get("/api/runs/{run_id}/report")

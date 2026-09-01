@@ -272,8 +272,19 @@ def get_run(run_id: str) -> Optional[Dict]:
 
 def delete_run(run_id: str) -> bool:
     with get_db() as conn:
+        conn.execute("DELETE FROM findings WHERE run_id=?", (run_id,))
+        conn.execute("DELETE FROM recommendations WHERE run_id=?", (run_id,))
         result = conn.execute("DELETE FROM runs WHERE run_id=?", (run_id,))
         return result.rowcount > 0
+
+
+def delete_all_runs() -> int:
+    with get_db() as conn:
+        conn.execute("DELETE FROM findings")
+        conn.execute("DELETE FROM recommendations")
+        result = conn.execute("DELETE FROM runs")
+        return result.rowcount
+
 
 
 def get_stats() -> Dict:
