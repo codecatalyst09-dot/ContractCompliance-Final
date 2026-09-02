@@ -140,19 +140,56 @@ def _render_pdf_evidence(
     full_height = page_rect.height
 
     if search_rects:
-        min_y = min(r.y0 for r in search_rects)
-        max_y = max(r.y1 for r in search_rects)
-        top_y = max(0.0, min_y - 65.0)
-        bot_y = min(full_height, max_y + 130.0)
-        if (bot_y - top_y) < 220.0:
-            diff = 220.0 - (bot_y - top_y)
-            top_y = max(0.0, top_y - diff / 2)
-            bot_y = min(full_height, bot_y + diff / 2)
+        # 4-coordinate tight bounds around matched clause
+        raw_min_x = min(r.x0 for r in search_rects)
+        raw_max_x = max(r.x1 for r in search_rects)
+        raw_min_y = min(r.y0 for r in search_rects)
+        raw_max_y = max(r.y1 for r in search_rects)
+
+        # Look up enclosing text block / paragraph for full contextual reading
+        enclosing_block = None
+        try:
+            for b in target_page.get_text("blocks"):
+                bx0, by0, bx1, by1 = b[0], b[1], b[2], b[3]
+                # Check overlap with search rects
+                if not (bx1 < raw_min_x or bx0 > raw_max_x or by1 < raw_min_y or by0 > raw_max_y):
+                    if enclosing_block is None:
+                        enclosing_block = [bx0, by0, bx1, by1]
+                    else:
+                        enclosing_block[0] = min(enclosing_block[0], bx0)
+                        enclosing_block[1] = min(enclosing_block[1], by0)
+                        enclosing_block[2] = max(enclosing_block[2], bx1)
+                        enclosing_block[3] = max(enclosing_block[3], by1)
+        except Exception:
+            enclosing_block = None
+
+        if enclosing_block:
+            min_x = max(0.0, enclosing_block[0] - 20.0)
+            max_x = min(full_width, enclosing_block[2] + 20.0)
+            min_y = max(0.0, enclosing_block[1] - 16.0)
+            max_y = min(full_height, enclosing_block[3] + 16.0)
+        else:
+            min_x = max(0.0, raw_min_x - 30.0)
+            max_x = min(full_width, raw_max_x + 30.0)
+            min_y = max(0.0, raw_min_y - 25.0)
+            max_y = min(full_height, raw_max_y + 30.0)
+
+        # Ensure minimal dimensions so small single-word tags are still comfortably readable
+        if (max_y - min_y) < 100.0:
+            diff_y = 100.0 - (max_y - min_y)
+            min_y = max(0.0, min_y - diff_y / 2)
+            max_y = min(full_height, max_y + diff_y / 2)
+
+        if (max_x - min_x) < 320.0:
+            diff_x = 320.0 - (max_x - min_x)
+            min_x = max(0.0, min_x - diff_x / 2)
+            max_x = min(full_width, max_x + diff_x / 2)
+
+        clip = pymupdf.Rect(min_x, min_y, max_x, max_y)
     else:
         top_y = 40.0
-        bot_y = min(full_height, 320.0)
-
-    clip = pymupdf.Rect(0, top_y, full_width, bot_y)
+        bot_y = min(full_height, 280.0)
+        clip = pymupdf.Rect(20.0, top_y, full_width - 20.0, bot_y)
 
     # Highlight matching text with soft yellow
     annots = []
@@ -165,7 +202,7 @@ def _render_pdf_evidence(
         except Exception:
             pass
 
-    # High-resolution rasterization (2.5x scale)
+    # High-resolution rasterization (2.5x scale for retina sharpness)
     zoom = 2.5
     matrix = pymupdf.Matrix(zoom, zoom)
     pix = target_page.get_pixmap(matrix=matrix, clip=clip, alpha=False)
@@ -185,12 +222,16 @@ def _render_pdf_evidence(
     FOOTER_H = 45
     MARGIN = 24
 
-    content_w = CARD_W - (MARGIN * 2)
-    scale = content_w / pdf_img.width
-    new_pdf_h = int(pdf_img.height * scale)
-    pdf_img_resized = pdf_img.resize((content_w, new_pdf_h), Image.Resampling.LANCZOS)
+    max_content_w = CARD_W - (MARGIN * 2)
+    scale = min(1.0, max_content_w / pdf_img.width)
+    display_w = int(pdf_img.width * scale)
+    display_h = int(pdf_img.height * scale)
+    if scale < 1.0:
+        pdf_img_resized = pdf_img.resize((display_w, display_h), Image.Resampling.LANCZOS)
+    else:
+        pdf_img_resized = pdf_img
 
-    CARD_H = HEADER_H + new_pdf_h + FOOTER_H + (MARGIN * 2)
+    CARD_H = HEADER_H + display_h + FOOTER_H + (MARGIN * 2)
 
     DARK_BG   = (10, 14, 26)
     CARD_BG   = (15, 23, 42)
@@ -246,13 +287,14 @@ def _render_pdf_evidence(
     # Header line
     draw.line([(2, HEADER_H), (CARD_W - 2, HEADER_H)], fill=BORDER, width=1)
 
-    # PDF container
+    # PDF container (centered horizontally)
+    snippet_x = (CARD_W - display_w) // 2
     snippet_y = HEADER_H + MARGIN
     draw.rounded_rectangle(
-        [(MARGIN - 2, snippet_y - 2), (MARGIN + content_w + 2, snippet_y + new_pdf_h + 2)],
+        [(snippet_x - 2, snippet_y - 2), (snippet_x + display_w + 2, snippet_y + display_h + 2)],
         radius=8, outline=BORDER, width=2, fill=(255, 255, 255)
     )
-    card.paste(pdf_img_resized, (MARGIN, snippet_y))
+    card.paste(pdf_img_resized, (snippet_x, snippet_y))
 
     # Footer
     foot_y = CARD_H - FOOTER_H

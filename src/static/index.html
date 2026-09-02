@@ -2837,7 +2837,7 @@
 
           <div class="form-group" style="margin-bottom:16px">
             <label class="form-label">Compliance Decision Notes & Reasoning <strong style="color:var(--fail)">*</strong></label>
-            <textarea id="adm-decision-notes" rows="3" class="form-input" placeholder="Enter mandatory justification or amendment directives..." style="width:100%;font-size:13px;line-height:1.5;resize:vertical">${notes}</textarea>
+            <textarea id="adm-decision-notes" rows="3" class="form-input" placeholder="Enter mandatory justification notes..." style="width:100%;font-size:13px;line-height:1.5;resize:vertical">${notes}</textarea>
           </div>
 
           <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
@@ -2846,9 +2846,6 @@
             </button>
             <button class="btn btn-primary" style="background:var(--fail);border:none" onclick="submitAdminDecision('${run.run_id}', 'REJECTED')">
               ❌ Reject Contract
-            </button>
-            <button class="btn btn-ghost" style="border-color:var(--primary-orange);color:var(--primary-orange)" onclick="submitAdminDecision('${run.run_id}', 'AMENDMENT_REQUESTED')">
-              📝 Request Amendment
             </button>
           </div>
         </div>
